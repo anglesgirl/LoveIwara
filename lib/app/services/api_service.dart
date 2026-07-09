@@ -503,10 +503,10 @@ class ApiService extends GetxService {
           return response;
         } catch (e) {
           LogUtils.e('$_tag[$requestId] 刷新后重试失败', error: e);
-          // 如果重试仍然失败，可能是其他问题
-          if (e is d_dio.DioException && e.response?.statusCode == 401) {
-            await _authService.handleTokenExpired();
-          }
+          // 刷新刚成功、拿到的是新 access token：此处再 401 不是 refresh token
+          // 失效的证据(可能端点因非认证原因 401，或又一次瞬时抖动)，不清 token、
+          // 不登出，仅本次请求失败降级(治根因B)。真失效由刷新端点连续 401 判定。
+          _markAuthRefreshFailed(options, 'retry_401_after_refresh_success');
           return null;
         }
       } else if (refreshResult.isAuthError) {

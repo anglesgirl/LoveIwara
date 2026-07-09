@@ -111,6 +111,13 @@ class TokenManager {
   // 避免旧账号的 access token 覆盖新会话(见 Finding #1)。
   int _tokenGeneration = 0;
 
+  // 刷新端点连续「确认」的 401 次数。refresh token 失效是重大动作(登出+盖墓碑)，
+  // 单次 401 可能是 Cloudflare/边缘/限流的瞬时误伤，据此登出会误杀完好的 30 天
+  // refresh token(治根因B)。故仅当连续达到 [_refreshAuthFailureThreshold] 次 401
+  // 才判定真失效；其间按可重试网络错误处理，任一次刷新成功即清零。
+  int _consecutiveRefreshAuthFailures = 0;
+  static const int _refreshAuthFailureThreshold = 2;
+
   // 认证失效回调：后台刷新发现 refresh token 失效时通知上层(AuthService)，
   // 让其执行登出/清理，而不是只停掉定时器(见 Finding #2)。
   void Function(String reason)? onAuthInvalidated;
@@ -418,6 +425,8 @@ class TokenManager {
 
     // 新登录开启新会话：递增代次，使任何在途的旧刷新回包失效(#1)。
     _tokenGeneration++;
+    // 新会话：清零刷新 401 计数(治根因B)。
+    _consecutiveRefreshAuthFailures = 0;
     _authToken = token;
     _updateTokenExpireTime(token, isAuthToken: true);
     // token 为敏感数据：绝不落明文(HIGH#1)；安全存储不可用时降级为
@@ -492,6 +501,8 @@ class TokenManager {
   Future<void> _commitSession(String refreshToken, String accessToken) async {
     // 递增代次，使旧会话的任何在途刷新作废(#1)。
     _tokenGeneration++;
+    // 新会话：清零刷新 401 计数(治根因B)。
+    _consecutiveRefreshAuthFailures = 0;
     // 与 clearTokens 一致：提交新会话时也复位旧会话的在途刷新状态，
     // 完成其等待者并清掉 _isRefreshing/completer，避免泄漏污染 isRefreshing(A1)。
     final pending = _refreshCompleter;
@@ -541,6 +552,28 @@ class TokenManager {
       fallback: SecureWriteFallback.encrypted,
     );
     LogUtils.d('$_tag Access token 已保存');
+  }
+
+  /// 刷新端点返回 401 的判定：单次 401 先当可重试网络错误(不登出、不盖墓碑)，
+  /// 仅连续 [_refreshAuthFailureThreshold] 次确认的 401 才判定 refresh token 真
+  /// 失效(治根因B：瞬时 401 误杀完好 token)。后台定时器与前台恢复会自然重试。
+  TokenRefreshResult _refresh401Result() {
+    _consecutiveRefreshAuthFailures++;
+    if (_consecutiveRefreshAuthFailures >= _refreshAuthFailureThreshold) {
+      LogUtils.w(
+        '$_tag 刷新连续第 $_consecutiveRefreshAuthFailures 次 401，判定 refresh token 失效',
+      );
+      return TokenRefreshResult.authError(
+        'Refresh token invalid (401 x$_consecutiveRefreshAuthFailures)',
+      );
+    }
+    LogUtils.w(
+      '$_tag 刷新遇到 401（第 $_consecutiveRefreshAuthFailures 次），'
+      '先按可重试网络错误处理，暂不登出',
+    );
+    return TokenRefreshResult.networkError(
+      'Transient 401 on refresh (attempt $_consecutiveRefreshAuthFailures)',
+    );
   }
 
   /// 刷新 access token - 核心方法
@@ -608,21 +641,21 @@ class TokenManager {
         );
       }
 
+      // 403：无论是否 Cloudflare challenge，一律按可重试网络错误处理，不当认证
+      // 失败(治根因B：非 challenge 的 403/边缘拦截会误杀完好的 refresh token)。
       if (response.statusCode == 403) {
         final cfMitigated = response.headers.value('cf-mitigated');
         if (cfMitigated != null && cfMitigated.contains('challenge')) {
           LogUtils.w('$_tag Token 刷新遇到 Cloudflare challenge (403)，稍后重试');
-          return finish(
-            TokenRefreshResult.networkError('Cloudflare challenge (403)'),
-          );
+        } else {
+          LogUtils.w('$_tag Token 刷新遇到 403（非 challenge），按可重试处理，暂不登出');
         }
+        return finish(TokenRefreshResult.networkError('Refresh got 403'));
       }
 
       if (response.statusCode == 401) {
-        // Refresh token 已失效，需要重新登录
-        return finish(
-          TokenRefreshResult.authError('Refresh token invalid (401)'),
-        );
+        // 单次 401 不立即登出：可能是瞬时误伤，连续确认才判定失效(治根因B)。
+        return finish(_refresh401Result());
       }
 
       if (response.statusCode == 200 &&
@@ -642,23 +675,31 @@ class TokenManager {
             return finish(TokenRefreshResult.superseded());
           }
 
+          // 刷新成功：清零连续 401 计数(治根因B)。
+          _consecutiveRefreshAuthFailures = 0;
           await _saveAccessToken(newAccessToken);
 
           LogUtils.i('$_tag Access token 刷新成功');
           return finish(TokenRefreshResult.success(newAccessToken));
         } else {
-          LogUtils.e('$_tag 返回的 access token 无效: $validation');
-          return finish(TokenRefreshResult.authError('Invalid token received'));
+          // 200 却拿不到有效 access token：不是 refresh token 失效的证据，
+          // 按可重试网络错误处理，绝不据此登出(治根因B)。
+          LogUtils.w('$_tag 返回的 access token 无效($validation)，按可重试处理');
+          return finish(
+            TokenRefreshResult.networkError('Invalid token received'),
+          );
         }
       }
 
-      LogUtils.e(
-        '$_tag Token 刷新响应无效 '
+      // 其它任何非成功响应(429/404/418/451/空体等)：一律按可重试网络错误处理，
+      // 不当认证失败——与 loginWithRefreshToken 的判定对齐(治根因B)。
+      LogUtils.w(
+        '$_tag Token 刷新响应非成功，按可重试处理 '
         '(status: ${response.statusCode}, dataType: ${data.runtimeType})',
       );
       return finish(
-        TokenRefreshResult.authError(
-          'Invalid refresh response (status: ${response.statusCode})',
+        TokenRefreshResult.networkError(
+          'Non-success refresh response (status: ${response.statusCode})',
         ),
       );
     } on dio.DioException catch (e) {
@@ -667,8 +708,8 @@ class TokenManager {
       TokenRefreshResult result;
 
       if (e.response?.statusCode == 401) {
-        // Refresh token 已失效，需要重新登录
-        result = TokenRefreshResult.authError('Refresh token invalid (401)');
+        // 单次 401 不立即登出：连续确认才判定失效(治根因B)。
+        result = _refresh401Result();
       } else if (_isNetworkError(e)) {
         // 网络错误，可以稍后重试
         result = TokenRefreshResult.networkError('Network error: ${e.message}');
@@ -793,6 +834,7 @@ class TokenManager {
 
     // 结束会话：递增代次，使任何在途的旧刷新回包失效(#1)。
     _tokenGeneration++;
+    _consecutiveRefreshAuthFailures = 0;
 
     _authToken = null;
     _accessToken = null;
