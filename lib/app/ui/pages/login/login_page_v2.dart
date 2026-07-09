@@ -13,8 +13,10 @@ import 'package:i_iwara/app/services/iwara_site_headers.dart';
 import 'package:i_iwara/app/services/storage_service.dart';
 import 'package:i_iwara/app/services/user_service.dart';
 import 'package:i_iwara/app/ui/widgets/md_toast_widget.dart';
+import 'package:i_iwara/app/ui/widgets/network_error_dialog.dart';
 import 'package:i_iwara/i18n/strings.g.dart' as slang;
 import 'package:i_iwara/utils/logger_utils.dart' show LogUtils;
+import 'package:i_iwara/utils/network_diagnostics.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -191,10 +193,25 @@ class _LoginDialogState extends State<LoginDialog> {
         unawaited(DefaultTagBlacklistReminder.checkAndRemind());
       } else {
         LogUtils.w('登录失败（业务返回）: ${result.message}', 'LoginDialogV2');
-        showToastWidget(
-          MDToastWidget(message: result.message, type: MDToastType.error),
-          position: ToastPosition.bottom,
-        );
+        final networkError = result.exception;
+        if (networkError != null && mounted) {
+          // 网络/传输类失败：弹出**真实原因**诊断，供用户一键复制分享给开发者，
+          // 而不是只丢一句「网络异常」（这正是排查不到问题的根源）。
+          await NetworkErrorDialog.show(
+            context,
+            report: NetworkDiagnostics.describe(
+              networkError,
+              stage: 'login',
+              friendly: result.message,
+            ),
+            friendly: result.message,
+          );
+        } else {
+          showToastWidget(
+            MDToastWidget(message: result.message, type: MDToastType.error),
+            position: ToastPosition.bottom,
+          );
+        }
       }
     } catch (error, stackTrace) {
       LogUtils.e(
@@ -203,13 +220,13 @@ class _LoginDialogState extends State<LoginDialog> {
         error: error,
         stackTrace: stackTrace,
       );
-      showToastWidget(
-        MDToastWidget(
-          message: slang.t.errors.unknownError,
-          type: MDToastType.error,
-        ),
-        position: ToastPosition.bottom,
-      );
+      if (mounted) {
+        await NetworkErrorDialog.show(
+          context,
+          report: NetworkDiagnostics.describe(error, stage: 'login'),
+          friendly: slang.t.errors.unknownError,
+        );
+      }
     } finally {
       if (mounted) {
         setState(() {

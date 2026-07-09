@@ -2276,6 +2276,7 @@ class _TranslationsErrorsNetworkZhCn implements TranslationsErrorsNetworkEn {
 	@override String get noRouteToHost => '无法找到主机';
 	@override String get connectionFailed => '连接失败';
 	@override String get sslConnectionFailed => 'SSL连接失败，请检查网络设置';
+	@override late final _TranslationsErrorsNetworkDiagnosticsZhCn diagnostics = _TranslationsErrorsNetworkDiagnosticsZhCn._(_root);
 }
 
 // Path: settings.keybinding
@@ -3306,6 +3307,18 @@ class _TranslationsAnime4kPresetNamesZhCn implements TranslationsAnime4kPresetNa
 	@override String get mode_a_hq_thin => 'Mode A (HQ) + 线条细化';
 }
 
+// Path: errors.network.diagnostics
+class _TranslationsErrorsNetworkDiagnosticsZhCn implements TranslationsErrorsNetworkDiagnosticsEn {
+	_TranslationsErrorsNetworkDiagnosticsZhCn._(this._root);
+
+	final TranslationsZhCn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '登录失败 · 网络诊断';
+	@override String get description => '下面是这次登录失败的真实网络原因。点「复制」后发给开发者，我们据此定位问题。内容不含账号和密码。';
+	@override String get detailsLabel => '技术细节';
+}
+
 // Path: videoDetail.cast.deviceTypes
 class _TranslationsVideoDetailCastDeviceTypesZhCn implements TranslationsVideoDetailCastDeviceTypesEn {
 	_TranslationsVideoDetailCastDeviceTypesZhCn._(this._root);
@@ -3749,6 +3762,9 @@ extension on TranslationsZhCn {
 			'errors.network.noRouteToHost' => '无法找到主机',
 			'errors.network.connectionFailed' => '连接失败',
 			'errors.network.sslConnectionFailed' => 'SSL连接失败，请检查网络设置',
+			'errors.network.diagnostics.title' => '登录失败 · 网络诊断',
+			'errors.network.diagnostics.description' => '下面是这次登录失败的真实网络原因。点「复制」后发给开发者，我们据此定位问题。内容不含账号和密码。',
+			'errors.network.diagnostics.detailsLabel' => '技术细节',
 			'friends.clickToRestoreFriend' => '点击恢复好友',
 			'friends.friendsList' => '好友列表',
 			'friends.friendRequests' => '好友请求',
@@ -3864,11 +3880,11 @@ extension on TranslationsZhCn {
 			'settings.thisConfigurationDeterminesTheWidthOfTheControlAreasOnTheLeftAndRightSidesOfThePlayer' => '此配置决定播放器左右两侧的控制区域宽度。',
 			'settings.proxyAddressCannotBeEmpty' => '代理地址不能为空。',
 			'settings.invalidProxyAddressFormatPleaseUseTheFormatOfIpPortOrDomainNamePort' => '无效的代理地址格式。请使用 IP:端口 或 域名:端口 格式。',
+			_ => null,
+		} ?? switch (path) {
 			'settings.proxyNormalWork' => '代理正常工作。',
 			'settings.testProxyFailedWithStatusCode' => ({required Object code}) => '代理请求失败，状态码: ${code}',
 			'settings.testProxyFailedWithException' => ({required Object exception}) => '代理请求出错: ${exception}',
-			_ => null,
-		} ?? switch (path) {
 			'settings.proxyConfig' => '代理配置',
 			'settings.thisIsHttpProxyAddress' => '此处为http代理地址',
 			'settings.checkProxy' => '检查代理',
@@ -4378,11 +4394,11 @@ extension on TranslationsZhCn {
 			'signIn.signInSuccess' => '签到成功！',
 			'signIn.signInFailed' => '签到失败，请稍后再试',
 			'signIn.consecutiveSignIns' => '连续签到天数',
+			_ => null,
+		} ?? switch (path) {
 			'signIn.failureReason' => '未能坚持签到的原因',
 			'signIn.selectDateRange' => '选择日期范围',
 			'signIn.startDate' => '开始日期',
-			_ => null,
-		} ?? switch (path) {
 			'signIn.endDate' => '结束日期',
 			'signIn.invalidDate' => '日期格式错误',
 			'signIn.invalidDateRange' => '日期范围无效',
@@ -4892,11 +4908,11 @@ extension on TranslationsZhCn {
 			'download.category.deleteTitle' => '删除分类',
 			'download.category.deleteConfirm' => ({required Object title, required Object count}) => '删除分类「${title}」？该分类下的 ${count} 个下载将移到「未分类」，文件不会被删除。',
 			'download.category.deleteSuccess' => '分类已删除',
+			_ => null,
+		} ?? switch (path) {
 			'download.category.deleteFailed' => '删除分类失败',
 			'download.maxConcurrentDownloads' => '最大同时下载数',
 			'download.maxConcurrentDownloadsDesc' => '同时进行下载的任务数量（1-5）',
-			_ => null,
-		} ?? switch (path) {
 			'download.downloadCompletedWithName' => ({required Object fileName}) => '下载完成: ${fileName}',
 			'download.stillInDevelopment' => '开发中',
 			'download.saveToAppDirectory' => '保存到应用目录',
@@ -5406,11 +5422,11 @@ extension on TranslationsZhCn {
 			'displaySettings.layoutSettingsDesc' => '自定义列数和断点配置',
 			'displaySettings.gridLayout' => '网格布局',
 			'displaySettings.navigationOrderSettings' => '导航排序设置',
+			_ => null,
+		} ?? switch (path) {
 			'displaySettings.customNavigationOrder' => '自定义导航顺序',
 			'displaySettings.customNavigationOrderDesc' => '调整底部导航栏和侧边栏中页面的显示顺序',
 			'layoutSettings.title' => '布局设置',
-			_ => null,
-		} ?? switch (path) {
 			'layoutSettings.descriptionTitle' => '布局配置说明',
 			'layoutSettings.descriptionContent' => '这里的配置将决定视频、图库列表页面中显示的列数。您可以选择自动模式让系统根据屏幕宽度自动调整，或选择手动模式固定列数。',
 			'layoutSettings.layoutMode' => '布局模式',

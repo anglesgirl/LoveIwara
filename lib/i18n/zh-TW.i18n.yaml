@@ -402,6 +402,10 @@ errors:
     noRouteToHost: '無法找到主機'
     connectionFailed: '連線失敗'
     sslConnectionFailed: 'SSL連線失敗，請檢查網路設定'
+    diagnostics:
+      title: '登入失敗 · 網路診斷'
+      description: '下面是這次登入失敗的真實網路原因。點「複製」後傳給開發者，我們據此定位問題。內容不含帳號和密碼。'
+      detailsLabel: '技術細節'
 friends:
   clickToRestoreFriend: 點擊復原朋友
   friendsList: 朋友列表
