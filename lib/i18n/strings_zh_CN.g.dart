@@ -1658,6 +1658,9 @@ class _TranslationsDiagnosticsZhCn implements TranslationsDiagnosticsEn {
 	@override String get copySupportEmailTitle => '复制日志邮箱';
 	@override String get reportIssueTitle => '反馈问题';
 	@override String get reportIssueSubtitle => '在 GitHub 提供复现步骤（请勿附完整日志）';
+	@override String get runNetworkCheckTitle => '运行网络诊断';
+	@override String get runNetworkCheckSubtitle => '探测 Iwara 与 GitHub 的连通性（DNS 解析 + 连接），区分 DNS 污染与代理问题';
+	@override String get networkCheckResultTitle => '网络诊断结果';
 	@override String get healthSummaryUnavailable => '暂无日志健康数据';
 	@override String get healthMetricsUnavailable => '尚未采集到健康指标';
 	@override String get healthNoRiskIndicators => '当前未发现风险指标';
@@ -5251,6 +5254,9 @@ extension on TranslationsZhCn {
 			'diagnostics.copySupportEmailTitle' => '复制日志邮箱',
 			'diagnostics.reportIssueTitle' => '反馈问题',
 			'diagnostics.reportIssueSubtitle' => '在 GitHub 提供复现步骤（请勿附完整日志）',
+			'diagnostics.runNetworkCheckTitle' => '运行网络诊断',
+			'diagnostics.runNetworkCheckSubtitle' => '探测 Iwara 与 GitHub 的连通性（DNS 解析 + 连接），区分 DNS 污染与代理问题',
+			'diagnostics.networkCheckResultTitle' => '网络诊断结果',
 			'diagnostics.healthSummaryUnavailable' => '暂无日志健康数据',
 			'diagnostics.healthMetricsUnavailable' => '尚未采集到健康指标',
 			'diagnostics.healthNoRiskIndicators' => '当前未发现风险指标',
@@ -5419,11 +5425,11 @@ extension on TranslationsZhCn {
 			'emoji.uploadErrorMessage' => ({required Object error}) => '上传过程中发生错误: ${error}',
 			'displaySettings.title' => '显示设置',
 			'displaySettings.layoutSettings' => '布局设置',
+			_ => null,
+		} ?? switch (path) {
 			'displaySettings.layoutSettingsDesc' => '自定义列数和断点配置',
 			'displaySettings.gridLayout' => '网格布局',
 			'displaySettings.navigationOrderSettings' => '导航排序设置',
-			_ => null,
-		} ?? switch (path) {
 			'displaySettings.customNavigationOrder' => '自定义导航顺序',
 			'displaySettings.customNavigationOrderDesc' => '调整底部导航栏和侧边栏中页面的显示顺序',
 			'layoutSettings.title' => '布局设置',

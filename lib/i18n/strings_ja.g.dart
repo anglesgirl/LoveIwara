@@ -1653,6 +1653,9 @@ class _TranslationsDiagnosticsJa implements TranslationsDiagnosticsEn {
 	@override String get copySupportEmailTitle => 'サポートメールをコピー';
 	@override String get reportIssueTitle => '問題を報告';
 	@override String get reportIssueSubtitle => 'GitHub に再現手順を記載（完全なログは添付しないでください）';
+	@override String get runNetworkCheckTitle => 'ネットワーク診断を実行';
+	@override String get runNetworkCheckSubtitle => 'Iwara と GitHub の到達性（DNS 解決＋接続）を調べ、DNS 汚染とプロキシ問題を切り分けます';
+	@override String get networkCheckResultTitle => 'ネットワーク診断結果';
 	@override String get healthSummaryUnavailable => 'ログヘルスデータがありません';
 	@override String get healthMetricsUnavailable => 'ヘルス指標がまだ収集されていません';
 	@override String get healthNoRiskIndicators => '現時点でリスク指標はありません';
@@ -5241,6 +5244,9 @@ extension on TranslationsJa {
 			'diagnostics.copySupportEmailTitle' => 'サポートメールをコピー',
 			'diagnostics.reportIssueTitle' => '問題を報告',
 			'diagnostics.reportIssueSubtitle' => 'GitHub に再現手順を記載（完全なログは添付しないでください）',
+			'diagnostics.runNetworkCheckTitle' => 'ネットワーク診断を実行',
+			'diagnostics.runNetworkCheckSubtitle' => 'Iwara と GitHub の到達性（DNS 解決＋接続）を調べ、DNS 汚染とプロキシ問題を切り分けます',
+			'diagnostics.networkCheckResultTitle' => 'ネットワーク診断結果',
 			'diagnostics.healthSummaryUnavailable' => 'ログヘルスデータがありません',
 			'diagnostics.healthMetricsUnavailable' => 'ヘルス指標がまだ収集されていません',
 			'diagnostics.healthNoRiskIndicators' => '現時点でリスク指標はありません',
@@ -5414,11 +5420,11 @@ extension on TranslationsJa {
 			'displaySettings.navigationOrderSettings' => 'ナビゲーション順序設定',
 			'displaySettings.customNavigationOrder' => 'カスタムナビゲーション順序',
 			'displaySettings.customNavigationOrderDesc' => 'ボトムナビゲーションバーとサイドバーのページ表示順序を調整',
+			_ => null,
+		} ?? switch (path) {
 			'layoutSettings.title' => 'レイアウト設定',
 			'layoutSettings.descriptionTitle' => 'レイアウト設定の説明',
 			'layoutSettings.descriptionContent' => 'ここでの設定は、動画とギャラリーリストページで表示されるカラム数を決定します。自動モードを選択して画面幅に基づいて自動調整するか、手動モードを選択してカラム数を固定できます。',
-			_ => null,
-		} ?? switch (path) {
 			'layoutSettings.layoutMode' => 'レイアウトモード',
 			'layoutSettings.reset' => 'リセット',
 			'layoutSettings.autoMode' => '自動モード',

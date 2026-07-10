@@ -367,9 +367,10 @@ class AuthService extends GetxService {
         ),
       );
     } catch (e, st) {
-      // 把**真实网络原因**（DioException 类型、底层 errno、CF 拦截头、响应片段等）
-      // 完整落日志，并把原始异常带回 UI，让登录页弹出可复制的诊断给用户分享。
-      final report = NetworkDiagnostics.describe(e, stage: 'login');
+      // 把**真实网络原因**（DioException 类型、底层 errno、CF 拦截头、响应片段、
+      // 以及主动 DNS 解析探测）完整落日志，并把原始异常带回 UI，让登录页弹出可
+      // 复制的诊断给用户分享。DNS 探测能区分「直连被拒/未走代理」与「DNS 污染」。
+      final report = await NetworkDiagnostics.describeAsync(e, stage: 'login');
       if (e is dio.DioException) {
         LogUtils.e(
           '$_tag 登录请求异常，网络诊断:\n$report',

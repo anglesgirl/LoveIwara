@@ -1684,6 +1684,9 @@ class _TranslationsDiagnosticsZhTw implements TranslationsDiagnosticsEn {
 	@override String get copySupportEmailTitle => '複製日誌信箱';
 	@override String get reportIssueTitle => '回報問題';
 	@override String get reportIssueSubtitle => '在 GitHub 提供重現步驟（請勿附完整日誌）';
+	@override String get runNetworkCheckTitle => '執行網路診斷';
+	@override String get runNetworkCheckSubtitle => '探測 Iwara 與 GitHub 的連通性（DNS 解析 + 連線），區分 DNS 汙染與代理問題';
+	@override String get networkCheckResultTitle => '網路診斷結果';
 	@override String get healthSummaryUnavailable => '暫無日誌健康資料';
 	@override String get healthMetricsUnavailable => '尚未採集到健康指標';
 	@override String get healthNoRiskIndicators => '目前未發現風險指標';
@@ -5275,6 +5278,9 @@ extension on TranslationsZhTw {
 			'diagnostics.copySupportEmailTitle' => '複製日誌信箱',
 			'diagnostics.reportIssueTitle' => '回報問題',
 			'diagnostics.reportIssueSubtitle' => '在 GitHub 提供重現步驟（請勿附完整日誌）',
+			'diagnostics.runNetworkCheckTitle' => '執行網路診斷',
+			'diagnostics.runNetworkCheckSubtitle' => '探測 Iwara 與 GitHub 的連通性（DNS 解析 + 連線），區分 DNS 汙染與代理問題',
+			'diagnostics.networkCheckResultTitle' => '網路診斷結果',
 			'diagnostics.healthSummaryUnavailable' => '暫無日誌健康資料',
 			'diagnostics.healthMetricsUnavailable' => '尚未採集到健康指標',
 			'diagnostics.healthNoRiskIndicators' => '目前未發現風險指標',
@@ -5417,11 +5423,11 @@ extension on TranslationsZhTw {
 			'emoji.formatExample' => '格式範例:\n["url1", "url2", "url3"]',
 			'emoji.pasteJsonUrlArray' => '請貼上JSON格式的URL陣列',
 			'emoji.import' => '匯入',
+			_ => null,
+		} ?? switch (path) {
 			'emoji.importSuccess' => ({required Object count}) => '成功匯入${count}張圖片',
 			'emoji.jsonFormatError' => 'JSON格式錯誤，請檢查輸入',
 			'emoji.createGroup' => '建立表情包分組',
-			_ => null,
-		} ?? switch (path) {
 			'emoji.groupName' => '分組名稱',
 			'emoji.enterGroupName' => '請輸入分組名稱',
 			'emoji.create' => '建立',

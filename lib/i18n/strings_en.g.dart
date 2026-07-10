@@ -4483,6 +4483,15 @@ class TranslationsDiagnosticsEn {
 	/// en: 'Provide reproduction steps on GitHub (do not attach full logs)'
 	String get reportIssueSubtitle => 'Provide reproduction steps on GitHub (do not attach full logs)';
 
+	/// en: 'Run Network Check'
+	String get runNetworkCheckTitle => 'Run Network Check';
+
+	/// en: 'Probe Iwara & GitHub reachability (DNS + connect) to tell DNS pollution from a proxy issue'
+	String get runNetworkCheckSubtitle => 'Probe Iwara & GitHub reachability (DNS + connect) to tell DNS pollution from a proxy issue';
+
+	/// en: 'Network check result'
+	String get networkCheckResultTitle => 'Network check result';
+
 	/// en: 'No log health data yet'
 	String get healthSummaryUnavailable => 'No log health data yet';
 
@@ -10038,6 +10047,9 @@ extension on Translations {
 			'diagnostics.copySupportEmailTitle' => 'Copy Support Email',
 			'diagnostics.reportIssueTitle' => 'Report Issue',
 			'diagnostics.reportIssueSubtitle' => 'Provide reproduction steps on GitHub (do not attach full logs)',
+			'diagnostics.runNetworkCheckTitle' => 'Run Network Check',
+			'diagnostics.runNetworkCheckSubtitle' => 'Probe Iwara & GitHub reachability (DNS + connect) to tell DNS pollution from a proxy issue',
+			'diagnostics.networkCheckResultTitle' => 'Network check result',
 			'diagnostics.healthSummaryUnavailable' => 'No log health data yet',
 			'diagnostics.healthMetricsUnavailable' => 'Health metrics have not been collected yet',
 			'diagnostics.healthNoRiskIndicators' => 'No risk indicators detected',
@@ -10129,11 +10141,11 @@ extension on Translations {
 			'log.logCleaningProcessMayNotBeCompleted' => 'Log cleaning process may not be completed',
 			'log.cleanExceededLogs' => 'Clean exceeded logs',
 			'log.noLogsToExport' => 'No logs to export',
+			_ => null,
+		} ?? switch (path) {
 			'log.exportingLogs' => 'Exporting logs...',
 			'log.noHistoryLogsToExport' => 'No history logs to export, please try using the app for a while first',
 			'log.selectLogDate' => 'Select Log Date',
-			_ => null,
-		} ?? switch (path) {
 			'log.today' => 'Today',
 			'log.selectMergeRange' => 'Select Merge Range',
 			'log.selectMergeRangeHint' => 'Please select the log time range to merge',
