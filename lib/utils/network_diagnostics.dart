@@ -104,19 +104,21 @@ class NetworkDiagnostics {
       }
       var cfHit = false;
       var suspicious = false;
+      var fakeIp = false;
       final parts = <String>[];
       for (final a in addrs) {
         final family = a.type == InternetAddressType.IPv6 ? 'IPv6' : 'IPv4';
         final klass = _classifyIp(a);
         if (klass == _IpClass.cloudflare) cfHit = true;
         if (klass == _IpClass.suspicious) suspicious = true;
+        if (klass == _IpClass.fakeIp) fakeIp = true;
         parts.add('${a.address} [$family ${_ipClassLabel(klass)}]');
       }
       b
         ..writeln('解析 lookup (${sw.elapsedMilliseconds}ms): ${parts.join(', ')}')
         ..writeln(
           '判定 verdict: '
-          '${_dnsVerdict(cfHit: cfHit, suspicious: suspicious)}',
+          '${_dnsVerdict(cfHit: cfHit, suspicious: suspicious, fakeIp: fakeIp)}',
         );
     } catch (e) {
       sw.stop();
@@ -178,6 +180,9 @@ class NetworkDiagnostics {
       if (b0 == 172 && b1 >= 16 && b1 <= 31) return _IpClass.suspicious;
       if (b0 == 192 && b1 == 168) return _IpClass.suspicious;
       if (b0 == 100 && b1 >= 64 && b1 <= 127) return _IpClass.suspicious;
+      // 198.18.0.0/15（RFC 2544 基准测试保留段）：Clash/sing-box 等 TUN 代理
+      // fake-ip 模式的默认网段——命中即说明设备正走系统级代理，不是污染。
+      if (b0 == 198 && (b1 == 18 || b1 == 19)) return _IpClass.fakeIp;
     } else if (a.type == InternetAddressType.IPv6 && raw.length == 16) {
       final allZero = raw.every((x) => x == 0);
       if (allZero) return _IpClass.suspicious;
@@ -226,6 +231,8 @@ class NetworkDiagnostics {
         return '~Cloudflare';
       case _IpClass.suspicious:
         return '⚠私有/保留';
+      case _IpClass.fakeIp:
+        return '⚑fake-ip(TUN代理)';
       case _IpClass.other:
         return '?非CF';
       case _IpClass.unknown:
@@ -233,7 +240,16 @@ class NetworkDiagnostics {
     }
   }
 
-  static String _dnsVerdict({required bool cfHit, required bool suspicious}) {
+  static String _dnsVerdict({
+    required bool cfHit,
+    required bool suspicious,
+    required bool fakeIp,
+  }) {
+    if (fakeIp) {
+      return '⚑ 解析到 fake-ip 段（198.18.0.0/15）——设备正在走 TUN/VPN 代理'
+          '（Clash/sing-box 类），DNS 由代理接管，这不是污染；'
+          '连接失败时应检查代理节点/分流规则';
+    }
     if (suspicious) {
       return '⚠ 解析到私有/保留/回环地址，高度疑似 DNS 污染'
           '（浏览器多半靠自带 DoH 才能打开）';
@@ -295,6 +311,10 @@ class NetworkDiagnostics {
       ..writeln('')
       ..writeln('--- 判读提示 / how to read ---')
       ..writeln(
+        '各 host 都解析到 198.18.x fake-ip → 设备正开着 TUN/VPN 代理'
+        '（即使上方 App 内代理显示 off），个别 host 失败=该 host 的代理节点/分流规则问题；',
+      )
+      ..writeln(
         '各 host 都解析到私有/保留 IP 或解析失败 → DNS 污染（系统性，需 App 内 DoH 或 TUN）；',
       )
       ..writeln('各 host 都解析到正常公网 IP 但连接被拒/超时 → 直连被墙（需走代理或 TUN 模式）；')
@@ -323,18 +343,20 @@ class NetworkDiagnostics {
       } else {
         var cfHit = false;
         var suspicious = false;
+        var fakeIp = false;
         final parts = <String>[];
         for (final a in addrs) {
           final family = a.type == InternetAddressType.IPv6 ? 'IPv6' : 'IPv4';
           final klass = _classifyIp(a);
           if (klass == _IpClass.cloudflare) cfHit = true;
           if (klass == _IpClass.suspicious) suspicious = true;
+          if (klass == _IpClass.fakeIp) fakeIp = true;
           parts.add('${a.address} [$family ${_ipClassLabel(klass)}]');
         }
         b
           ..writeln('DNS (${dnsSw.elapsedMilliseconds}ms): ${parts.join(', ')}')
           ..writeln(
-            '  判定 verdict: ${_hostDnsVerdict(cfHit: cfHit, suspicious: suspicious, expectCloudflare: target.expectCloudflare)}',
+            '  判定 verdict: ${_hostDnsVerdict(cfHit: cfHit, suspicious: suspicious, fakeIp: fakeIp, expectCloudflare: target.expectCloudflare)}',
           );
       }
     } catch (e) {
@@ -363,8 +385,13 @@ class NetworkDiagnostics {
   static String _hostDnsVerdict({
     required bool cfHit,
     required bool suspicious,
+    required bool fakeIp,
     required bool expectCloudflare,
   }) {
+    if (fakeIp) {
+      return '⚑ fake-ip 段（198.18.0.0/15）——设备正走 TUN/VPN 代理，'
+          'DNS 由代理接管，非污染；连接结果反映代理出口质量';
+    }
     if (suspicious) {
       return '⚠ 私有/保留/回环地址，高度疑似 DNS 污染';
     }
@@ -577,6 +604,9 @@ enum _IpClass {
 
   /// 私有 / 保留 / 回环 / 链路本地等——高度疑似 DNS 污染。
   suspicious,
+
+  /// 198.18.0.0/15 fake-ip 段——设备正走 TUN/VPN 代理，DNS 由代理接管。
+  fakeIp,
 
   /// 公网但不在 Cloudflare 段——存疑（污染或 CDN 变更）。
   other,
