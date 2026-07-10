@@ -3,14 +3,61 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'log_models.dart';
 import 'log_paths.dart';
+import 'native_exit_info.dart';
 
 class CrashDetectionService {
   final LogPaths _paths;
   CrashRecoveryResult? _lastResult;
+  List<NativeExitRecord>? _nativeExitRecords;
+  NativeExitRecord? _matchedNativeExit;
 
   CrashDetectionService(this._paths);
 
   CrashRecoveryResult? get lastResult => _lastResult;
+
+  /// 系统记录的最近几条进程退出记录（Android API 30+，其余平台为 null）。
+  List<NativeExitRecord>? get nativeExitRecords => _nativeExitRecords;
+
+  /// 与上一会话时间窗匹配上的那条退出记录；null 表示未匹配（记录被系统裁剪
+  /// 或时间对不上），此时 [nativeExitRecords] 仍可作参考。
+  NativeExitRecord? get matchedNativeExit => _matchedNativeExit;
+
+  // 系统每包保留约 16 条历史退出记录，全量拉取：闪退往往难以按需复现，
+  // 几天前的死亡记录可能就是仅存的一手证据。
+  static const int _nativeExitFetchCount = 16;
+
+  /// 拉取系统侧退出记录（不要求存在异常退出标记）。幂等缓存；必须在
+  /// Flutter 引擎附着后调用（MethodChannel 依赖），失败静默返回 null。
+  Future<List<NativeExitRecord>?> loadNativeExitRecords() async {
+    _nativeExitRecords ??= await NativeExitInfoService.fetch(
+      maxCount: _nativeExitFetchCount,
+    );
+    return _nativeExitRecords;
+  }
+
+  /// 拉取系统侧退出记录并与上一会话匹配。幂等：成功拿到记录后重复调用直接
+  /// 返回缓存。必须在 Flutter 引擎附着后调用（MethodChannel 依赖），失败静默。
+  Future<NativeExitRecord?> enrichWithNativeExitInfo() async {
+    final result = _lastResult;
+    if (result == null || !result.hadUncleanExit) return null;
+    if (_matchedNativeExit != null) return _matchedNativeExit;
+
+    final records = await loadNativeExitRecords();
+    if (records == null) return null;
+
+    // 记录按时间倒序；上一进程的死亡时间必然晚于其启动标记。留 60 秒余量
+    // 容忍标记写入与进程真正拉起之间的时钟误差。
+    final startMs = result.previousStartTime?.millisecondsSinceEpoch;
+    if (startMs != null) {
+      for (final record in records) {
+        if (record.timestampMs >= startMs - 60000) {
+          _matchedNativeExit = record;
+          break;
+        }
+      }
+    }
+    return _matchedNativeExit;
+  }
 
   Future<void> markAppStart({
     required String sessionId,

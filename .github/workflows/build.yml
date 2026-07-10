@@ -83,17 +83,37 @@ jobs:
       - name: Rename APKs with version
         run: |
           APP_VERSION=$(grep "version:" pubspec.yaml | cut -d':' -f2 | tr -d ' ' | cut -d'+' -f1)
+          echo "APP_VERSION=${APP_VERSION}" >> "$GITHUB_ENV"
           mkdir -p result
           cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk result/i_iwara-${APP_VERSION}-arm64-v8a.apk
           cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk result/i_iwara-${APP_VERSION}-armeabi-v7a.apk
           cp build/app/outputs/flutter-apk/app-x86_64-release.apk result/i_iwara-${APP_VERSION}-x86_64.apk
           cp build/app/outputs/flutter-apk/app-release.apk result/i_iwara-${APP_VERSION}-universal.apk
 
-      - name: Upload Android Builds
+      # 每个 APK 独立成 artifact，可单独下载，不再合并进一个 android_builds 包。
+      - name: Upload arm64-v8a APK
         uses: actions/upload-artifact@v7
         with:
-          name: android_builds
-          path: result/
+          name: i_iwara-${{ env.APP_VERSION }}-arm64-v8a
+          path: result/i_iwara-${{ env.APP_VERSION }}-arm64-v8a.apk
+
+      - name: Upload armeabi-v7a APK
+        uses: actions/upload-artifact@v7
+        with:
+          name: i_iwara-${{ env.APP_VERSION }}-armeabi-v7a
+          path: result/i_iwara-${{ env.APP_VERSION }}-armeabi-v7a.apk
+
+      - name: Upload x86_64 APK
+        uses: actions/upload-artifact@v7
+        with:
+          name: i_iwara-${{ env.APP_VERSION }}-x86_64
+          path: result/i_iwara-${{ env.APP_VERSION }}-x86_64.apk
+
+      - name: Upload universal APK
+        uses: actions/upload-artifact@v7
+        with:
+          name: i_iwara-${{ env.APP_VERSION }}-universal
+          path: result/i_iwara-${{ env.APP_VERSION }}-universal.apk
 
   build-windows:
     if: ${{ inputs.build_windows }}

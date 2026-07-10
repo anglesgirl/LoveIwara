@@ -62,7 +62,10 @@ class _HomeShellScaffoldState extends State<HomeShellScaffold>
 
   @override
   void didHaveMemoryPressure() {
-    LogUtils.w('检测到内存压力，开始主动清理缓存', 'HomeShellScaffold');
+    LogUtils.w(
+      '检测到内存压力，开始主动清理缓存 (RSS: ${LogUtils.currentRssMb()}MB)',
+      'HomeShellScaffold',
+    );
 
     final imageCache = PaintingBinding.instance.imageCache;
     imageCache.clear();

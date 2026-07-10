@@ -583,7 +583,7 @@ class MyVideoStateController extends GetxController
     randomId =
         '${DateTime.now().millisecondsSinceEpoch}_${Random().nextInt(1000000)}';
     LogUtils.i(
-      '初始化 MyVideoStateController，videoId: $videoId',
+      '初始化 MyVideoStateController，videoId: $videoId (RSS: ${LogUtils.currentRssMb()}MB)',
       'MyVideoStateController',
     );
     try {
@@ -1719,7 +1719,10 @@ class MyVideoStateController extends GetxController
       // 释放播放器资源
       try {
         player.dispose();
-        LogUtils.w('播放器资源已释放', 'MyVideoStateController');
+        LogUtils.w(
+          '播放器资源已释放 (RSS: ${LogUtils.currentRssMb()}MB)',
+          'MyVideoStateController',
+        );
       } catch (e) {
         LogUtils.w('尝试释放播放器资源时出错: $e', 'MyVideoStateController');
       }
