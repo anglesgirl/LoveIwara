@@ -103,6 +103,25 @@ class LogExportService {
       );
       encoder.addFileSync(healthMeta, 'meta/health.json');
 
+      // 系统退出记录无条件随包导出：不依赖本次启动的异常退出标记。闪退
+      // 常常无法按需复现，系统账本里几天前的死亡记录（跨版本升级不清空）
+      // 可能就是仅存的一手死因。
+      try {
+        final exitRecords = await _crash.loadNativeExitRecords();
+        if (exitRecords != null && exitRecords.isNotEmpty) {
+          final exitRecordsMeta = await _writeTempFile(
+            tempDir: tempDir,
+            fileName: 'exit_records.json',
+            content: jsonEncode(
+              exitRecords.map((r) => r.toJson()).toList(),
+            ),
+          );
+          encoder.addFileSync(exitRecordsMeta, 'crash/exit_records.json');
+        }
+      } catch (e) {
+        debugPrint('[LogExport] 导出系统退出记录失败: $e');
+      }
+
       // Add crash info if available
       final crashResult = _crash.lastResult;
       if (crashResult != null && crashResult.hadUncleanExit) {
@@ -124,10 +143,9 @@ class LogExportService {
           'lastHangEvent': crashResult.lastHangEvent?.toJson(),
           'nativeExitInfo': {
             'matched': matchedExit?.toJson(),
-            // matched 已携带 trace；仅当没匹配上时才在 recent 里保留 trace，
-            // 避免 tombstone 双份膨胀，也避免未匹配时把它弄丢。
+            // trace 全量在 crash/exit_records.json；这里只留摘要防重复膨胀。
             'recent': _crash.nativeExitRecords
-                ?.map((r) => r.toJson(includeTrace: matchedExit == null))
+                ?.map((r) => r.toJson(includeTrace: false))
                 .toList(),
           },
           'analysis': _buildCrashAnalysis(
