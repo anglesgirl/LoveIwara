@@ -1653,6 +1653,9 @@ class _TranslationsDiagnosticsJa implements TranslationsDiagnosticsEn {
 	@override String get copySupportEmailTitle => 'サポートメールをコピー';
 	@override String get reportIssueTitle => '問題を報告';
 	@override String get reportIssueSubtitle => 'GitHub に再現手順を記載（完全なログは添付しないでください）';
+	@override String get runNetworkCheckTitle => 'ネットワーク診断を実行';
+	@override String get runNetworkCheckSubtitle => 'Iwara と GitHub の到達性（DNS 解決＋接続）を調べ、DNS 汚染とプロキシ問題を切り分けます';
+	@override String get networkCheckResultTitle => 'ネットワーク診断結果';
 	@override String get healthSummaryUnavailable => 'ログヘルスデータがありません';
 	@override String get healthMetricsUnavailable => 'ヘルス指標がまだ収集されていません';
 	@override String get healthNoRiskIndicators => '現時点でリスク指標はありません';
@@ -2271,6 +2274,7 @@ class _TranslationsErrorsNetworkJa implements TranslationsErrorsNetworkEn {
 	@override String get noRouteToHost => 'ホストに到達できません';
 	@override String get connectionFailed => '接続に失敗しました';
 	@override String get sslConnectionFailed => 'SSL接続に失敗しました。ネットワーク設定を確認してください';
+	@override late final _TranslationsErrorsNetworkDiagnosticsJa diagnostics = _TranslationsErrorsNetworkDiagnosticsJa._(_root);
 }
 
 // Path: settings.keybinding
@@ -3301,6 +3305,18 @@ class _TranslationsAnime4kPresetNamesJa implements TranslationsAnime4kPresetName
 	@override String get mode_a_hq_thin => 'Mode A (HQ) + ライン細化';
 }
 
+// Path: errors.network.diagnostics
+class _TranslationsErrorsNetworkDiagnosticsJa implements TranslationsErrorsNetworkDiagnosticsEn {
+	_TranslationsErrorsNetworkDiagnosticsJa._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'ログイン失敗 · ネットワーク診断';
+	@override String get description => '以下はログイン失敗の実際のネットワーク原因です。「コピー」を押して開発者に送ってください。原因の特定に使います。アカウントやパスワードは含まれません。';
+	@override String get detailsLabel => '技術的な詳細';
+}
+
 // Path: videoDetail.cast.deviceTypes
 class _TranslationsVideoDetailCastDeviceTypesJa implements TranslationsVideoDetailCastDeviceTypesEn {
 	_TranslationsVideoDetailCastDeviceTypesJa._(this._root);
@@ -3739,6 +3755,9 @@ extension on TranslationsJa {
 			'errors.network.noRouteToHost' => 'ホストに到達できません',
 			'errors.network.connectionFailed' => '接続に失敗しました',
 			'errors.network.sslConnectionFailed' => 'SSL接続に失敗しました。ネットワーク設定を確認してください',
+			'errors.network.diagnostics.title' => 'ログイン失敗 · ネットワーク診断',
+			'errors.network.diagnostics.description' => '以下はログイン失敗の実際のネットワーク原因です。「コピー」を押して開発者に送ってください。原因の特定に使います。アカウントやパスワードは含まれません。',
+			'errors.network.diagnostics.detailsLabel' => '技術的な詳細',
 			'friends.clickToRestoreFriend' => '友達を復元するにはクリックしてください',
 			'friends.friendsList' => '友達リスト',
 			'friends.friendRequests' => '友達リクエスト',
@@ -3859,11 +3878,11 @@ extension on TranslationsJa {
 			'settings.testProxyFailedWithException' => ({required Object exception}) => 'プロキシリクエスト中にエラーが発生しました: ${exception}',
 			'settings.proxyConfig' => 'プロキシ設定',
 			'settings.thisIsHttpProxyAddress' => 'ここにHTTPプロキシアドレスを入力してください',
+			_ => null,
+		} ?? switch (path) {
 			'settings.checkProxy' => 'プロキシを確認',
 			'settings.proxyAddress' => 'プロキシアドレス',
 			'settings.pleaseEnterTheUrlOfTheProxyServerForExample1270018080' => 'プロキシサーバーのURLを入力してください（例: 127.0.0.1:8080）',
-			_ => null,
-		} ?? switch (path) {
 			'settings.enableProxy' => 'プロキシを有効にする',
 			'settings.left' => '左',
 			'settings.middle' => '中央',
@@ -4373,11 +4392,11 @@ extension on TranslationsJa {
 			'signIn.startDate' => '開始日',
 			'signIn.endDate' => '終了日',
 			'signIn.invalidDate' => '日付形式が正しくありません',
+			_ => null,
+		} ?? switch (path) {
 			'signIn.invalidDateRange' => '日付範囲が無効です',
 			'signIn.errorFormatText' => '日付形式が正しくありません',
 			'signIn.errorInvalidText' => '日付範囲が無効です',
-			_ => null,
-		} ?? switch (path) {
 			'signIn.errorInvalidRangeText' => '日付範囲が無効です',
 			'signIn.dateRangeCantBeMoreThanOneYear' => '日付範囲は1年を超えることはできません',
 			'signIn.signIn' => 'サインイン',
@@ -4887,11 +4906,11 @@ extension on TranslationsJa {
 			'download.maxConcurrentDownloads' => '最大同時ダウンロード数',
 			'download.maxConcurrentDownloadsDesc' => '同時にダウンロードするタスク数（1-5）',
 			'download.stillInDevelopment' => '開発中',
+			_ => null,
+		} ?? switch (path) {
 			'download.saveToAppDirectory' => 'アプリケーションディレクトリに保存',
 			'download.alreadyDownloadedWithQuality' => 'すでに同じ品質のタスクがあります。続けてダウンロードしますか？',
 			'download.alreadyDownloadedWithQualities' => ({required Object qualities}) => 'すでに品質が${qualities}のタスクがあります。続けてダウンロードしますか？',
-			_ => null,
-		} ?? switch (path) {
 			'download.otherQualities' => 'その他の品質',
 			'download.batchDownload.title' => '一括ダウンロード',
 			'download.batchDownload.downloadTaskAlreadyRunning' => 'タスクが実行中です。しばらくお待ちください',
@@ -5225,6 +5244,9 @@ extension on TranslationsJa {
 			'diagnostics.copySupportEmailTitle' => 'サポートメールをコピー',
 			'diagnostics.reportIssueTitle' => '問題を報告',
 			'diagnostics.reportIssueSubtitle' => 'GitHub に再現手順を記載（完全なログは添付しないでください）',
+			'diagnostics.runNetworkCheckTitle' => 'ネットワーク診断を実行',
+			'diagnostics.runNetworkCheckSubtitle' => 'Iwara と GitHub の到達性（DNS 解決＋接続）を調べ、DNS 汚染とプロキシ問題を切り分けます',
+			'diagnostics.networkCheckResultTitle' => 'ネットワーク診断結果',
 			'diagnostics.healthSummaryUnavailable' => 'ログヘルスデータがありません',
 			'diagnostics.healthMetricsUnavailable' => 'ヘルス指標がまだ収集されていません',
 			'diagnostics.healthNoRiskIndicators' => '現時点でリスク指標はありません',
@@ -5398,14 +5420,14 @@ extension on TranslationsJa {
 			'displaySettings.navigationOrderSettings' => 'ナビゲーション順序設定',
 			'displaySettings.customNavigationOrder' => 'カスタムナビゲーション順序',
 			'displaySettings.customNavigationOrderDesc' => 'ボトムナビゲーションバーとサイドバーのページ表示順序を調整',
+			_ => null,
+		} ?? switch (path) {
 			'layoutSettings.title' => 'レイアウト設定',
 			'layoutSettings.descriptionTitle' => 'レイアウト設定の説明',
 			'layoutSettings.descriptionContent' => 'ここでの設定は、動画とギャラリーリストページで表示されるカラム数を決定します。自動モードを選択して画面幅に基づいて自動調整するか、手動モードを選択してカラム数を固定できます。',
 			'layoutSettings.layoutMode' => 'レイアウトモード',
 			'layoutSettings.reset' => 'リセット',
 			'layoutSettings.autoMode' => '自動モード',
-			_ => null,
-		} ?? switch (path) {
 			'layoutSettings.autoModeDesc' => '画面幅に基づいて自動調整',
 			'layoutSettings.manualMode' => '手動モード',
 			'layoutSettings.manualModeDesc' => '固定カラム数を使用',

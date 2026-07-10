@@ -402,6 +402,10 @@ errors:
     noRouteToHost: 'No route to host'
     connectionFailed: 'Connection failed'
     sslConnectionFailed: 'SSL connection failed, please check your network settings'
+    diagnostics:
+      title: 'Login failed · Network diagnostics'
+      description: 'Below is the real network reason your login failed. Tap Copy and send it to the developer so we can pinpoint the issue. It contains no account or password.'
+      detailsLabel: 'Technical details'
 friends:
   clickToRestoreFriend: Click to restore friend
   friendsList: Friends List
@@ -2092,6 +2096,9 @@ diagnostics:
   copySupportEmailTitle: "Copy Support Email"
   reportIssueTitle: "Report Issue"
   reportIssueSubtitle: "Provide reproduction steps on GitHub (do not attach full logs)"
+  runNetworkCheckTitle: "Run Network Check"
+  runNetworkCheckSubtitle: "Probe Iwara & GitHub reachability (DNS + connect) to tell DNS pollution from a proxy issue"
+  networkCheckResultTitle: "Network check result"
   healthSummaryUnavailable: "No log health data yet"
   healthMetricsUnavailable: "Health metrics have not been collected yet"
   healthNoRiskIndicators: "No risk indicators detected"

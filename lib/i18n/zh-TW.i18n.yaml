@@ -402,6 +402,10 @@ errors:
     noRouteToHost: '無法找到主機'
     connectionFailed: '連線失敗'
     sslConnectionFailed: 'SSL連線失敗，請檢查網路設定'
+    diagnostics:
+      title: '登入失敗 · 網路診斷'
+      description: '下面是這次登入失敗的真實網路原因。點「複製」後傳給開發者，我們據此定位問題。內容不含帳號和密碼。'
+      detailsLabel: '技術細節'
 friends:
   clickToRestoreFriend: 點擊復原朋友
   friendsList: 朋友列表
@@ -2044,6 +2048,9 @@ diagnostics:
   copySupportEmailTitle: "複製日誌信箱"
   reportIssueTitle: "回報問題"
   reportIssueSubtitle: "在 GitHub 提供重現步驟（請勿附完整日誌）"
+  runNetworkCheckTitle: "執行網路診斷"
+  runNetworkCheckSubtitle: "探測 Iwara 與 GitHub 的連通性（DNS 解析 + 連線），區分 DNS 汙染與代理問題"
+  networkCheckResultTitle: "網路診斷結果"
   healthSummaryUnavailable: "暫無日誌健康資料"
   healthMetricsUnavailable: "尚未採集到健康指標"
   healthNoRiskIndicators: "目前未發現風險指標"
