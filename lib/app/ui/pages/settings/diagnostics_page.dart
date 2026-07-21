@@ -19,8 +19,6 @@ import 'package:i_iwara/app/ui/pages/settings/settings_page.dart';
 import 'package:i_iwara/app/ui/pages/settings/log_viewer_page.dart';
 import 'package:i_iwara/app/ui/widgets/media_query_insets_fix.dart';
 import 'package:i_iwara/common/constants.dart';
-import 'package:i_iwara/utils/network_diagnostics.dart';
-import 'package:i_iwara/app/ui/widgets/network_error_dialog.dart';
 import 'package:i_iwara/i18n/strings.g.dart' as slang;
 
 class DiagnosticsPage extends StatefulWidget {
@@ -38,7 +36,6 @@ class _DiagnosticsPageState extends State<DiagnosticsPage> {
   static const int _queueWarnThreshold = (LogConstants.highWaterMark * 8) ~/ 10;
   static const int _flushLatencyWarnMs = 2000;
   bool _isExporting = false;
-  bool _isRunningNetworkCheck = false;
   bool _isApplyingLogPolicy = false;
   String _deviceInfo = '';
   LogHealthSnapshot? _logHealthSnapshot;
@@ -466,22 +463,6 @@ class _DiagnosticsPageState extends State<DiagnosticsPage> {
                         ),
                       ),
                     ),
-                    _buildActionTile(
-                      icon: Icons.network_check,
-                      title: t.diagnostics.runNetworkCheckTitle,
-                      subtitle: t.diagnostics.runNetworkCheckSubtitle,
-                      trailing: _isRunningNetworkCheck
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : null,
-                      onTap: _isRunningNetworkCheck
-                          ? null
-                          : _runNetworkDiagnostics,
-                    ),
-                    _buildDivider(),
                     _buildActionTile(
                       icon: Icons.upload_file,
                       title: t.diagnostics.exportLogsTitle,
@@ -925,31 +906,6 @@ class _DiagnosticsPageState extends State<DiagnosticsPage> {
         color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
       ),
     );
-  }
-
-  /// 主动网络连通性体检：对 Iwara + GitHub 分别做 DNS 解析 + 真实连接，
-  /// 结果以可复制文本弹出。已登录、内容全刷不出来的用户不必等失败请求即可自查。
-  Future<void> _runNetworkDiagnostics() async {
-    setState(() => _isRunningNetworkCheck = true);
-    try {
-      final report = await NetworkDiagnostics.runConnectivityReport();
-      if (!mounted) return;
-      await NetworkErrorDialog.show(
-        context,
-        report: report,
-        friendly: slang.t.diagnostics.networkCheckResultTitle,
-      );
-    } catch (e) {
-      if (mounted) {
-        showToastWidget(
-          MDToastWidget(message: e.toString(), type: MDToastType.error),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isRunningNetworkCheck = false);
-      }
-    }
   }
 
   Future<void> _exportLogs() async {

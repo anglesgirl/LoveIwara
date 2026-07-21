@@ -4483,15 +4483,6 @@ class TranslationsDiagnosticsEn {
 	/// en: 'Provide reproduction steps on GitHub (do not attach full logs)'
 	String get reportIssueSubtitle => 'Provide reproduction steps on GitHub (do not attach full logs)';
 
-	/// en: 'Run Network Check'
-	String get runNetworkCheckTitle => 'Run Network Check';
-
-	/// en: 'Probe Iwara & GitHub reachability (DNS + connect) to tell DNS pollution from a proxy issue'
-	String get runNetworkCheckSubtitle => 'Probe Iwara & GitHub reachability (DNS + connect) to tell DNS pollution from a proxy issue';
-
-	/// en: 'Network check result'
-	String get networkCheckResultTitle => 'Network check result';
-
 	/// en: 'No log health data yet'
 	String get healthSummaryUnavailable => 'No log health data yet';
 
@@ -5662,8 +5653,6 @@ class TranslationsErrorsNetworkEn {
 
 	/// en: 'SSL connection failed, please check your network settings'
 	String get sslConnectionFailed => 'SSL connection failed, please check your network settings';
-
-	late final TranslationsErrorsNetworkDiagnosticsEn diagnostics = TranslationsErrorsNetworkDiagnosticsEn._(_root);
 }
 
 // Path: settings.keybinding
@@ -7974,24 +7963,6 @@ class TranslationsAnime4kPresetNamesEn {
 	String get mode_a_hq_thin => 'Mode A (HQ) + Line Thinning';
 }
 
-// Path: errors.network.diagnostics
-class TranslationsErrorsNetworkDiagnosticsEn {
-	TranslationsErrorsNetworkDiagnosticsEn._(this._root);
-
-	final Translations _root; // ignore: unused_field
-
-	// Translations
-
-	/// en: 'Login failed · Network diagnostics'
-	String get title => 'Login failed · Network diagnostics';
-
-	/// en: 'Below is the real network reason your login failed. Tap Copy and send it to the developer so we can pinpoint the issue. It contains no account or password.'
-	String get description => 'Below is the real network reason your login failed. Tap Copy and send it to the developer so we can pinpoint the issue. It contains no account or password.';
-
-	/// en: 'Technical details'
-	String get detailsLabel => 'Technical details';
-}
-
 // Path: videoDetail.cast.deviceTypes
 class TranslationsVideoDetailCastDeviceTypesEn {
 	TranslationsVideoDetailCastDeviceTypesEn._(this._root);
@@ -8476,9 +8447,6 @@ extension on Translations {
 			'errors.network.noRouteToHost' => 'No route to host',
 			'errors.network.connectionFailed' => 'Connection failed',
 			'errors.network.sslConnectionFailed' => 'SSL connection failed, please check your network settings',
-			'errors.network.diagnostics.title' => 'Login failed · Network diagnostics',
-			'errors.network.diagnostics.description' => 'Below is the real network reason your login failed. Tap Copy and send it to the developer so we can pinpoint the issue. It contains no account or password.',
-			'errors.network.diagnostics.detailsLabel' => 'Technical details',
 			'friends.clickToRestoreFriend' => 'Click to restore friend',
 			'friends.friendsList' => 'Friends List',
 			'friends.friendRequests' => 'Friend Requests',
@@ -8599,11 +8567,11 @@ extension on Translations {
 			'settings.testProxyFailedWithException' => ({required Object exception}) => 'Test proxy failed, exception: ${exception}',
 			'settings.proxyConfig' => 'Proxy Config',
 			'settings.thisIsHttpProxyAddress' => 'This is http proxy address',
-			_ => null,
-		} ?? switch (path) {
 			'settings.checkProxy' => 'Check Proxy',
 			'settings.proxyAddress' => 'Proxy Address',
 			'settings.pleaseEnterTheUrlOfTheProxyServerForExample1270018080' => 'Please enter the URL of the proxy server, for example 127.0.0.1:8080',
+			_ => null,
+		} ?? switch (path) {
 			'settings.enableProxy' => 'Enable Proxy',
 			'settings.left' => 'Left',
 			'settings.middle' => 'Middle',
@@ -9113,11 +9081,11 @@ extension on Translations {
 			'signIn.startDate' => 'Start Date',
 			'signIn.endDate' => 'End Date',
 			'signIn.invalidDate' => 'Invalid Date',
-			_ => null,
-		} ?? switch (path) {
 			'signIn.invalidDateRange' => 'Invalid Date Range',
 			'signIn.errorFormatText' => 'Date Format Error',
 			'signIn.errorInvalidText' => 'Invalid Date Range',
+			_ => null,
+		} ?? switch (path) {
 			'signIn.errorInvalidRangeText' => 'Invalid Date Range',
 			'signIn.dateRangeCantBeMoreThanOneYear' => 'Date range cannot be more than one year',
 			'signIn.signIn' => 'Sign In',
@@ -9627,11 +9595,11 @@ extension on Translations {
 			'download.maxConcurrentDownloads' => 'Max concurrent downloads',
 			'download.maxConcurrentDownloadsDesc' => 'Number of tasks downloading at the same time (1-5)',
 			'download.stillInDevelopment' => 'Still in development',
-			_ => null,
-		} ?? switch (path) {
 			'download.saveToAppDirectory' => 'Save to app directory',
 			'download.alreadyDownloadedWithQuality' => 'Already downloaded with the same quality, continue downloading?',
 			'download.alreadyDownloadedWithQualities' => ({required Object qualities}) => 'Already downloaded with qualities: ${qualities}, continue downloading?',
+			_ => null,
+		} ?? switch (path) {
 			'download.otherQualities' => 'Other qualities',
 			'download.batchDownload.title' => 'Batch Download',
 			'download.batchDownload.downloadTaskAlreadyRunning' => 'A task is already running, please wait.',
@@ -10047,9 +10015,6 @@ extension on Translations {
 			'diagnostics.copySupportEmailTitle' => 'Copy Support Email',
 			'diagnostics.reportIssueTitle' => 'Report Issue',
 			'diagnostics.reportIssueSubtitle' => 'Provide reproduction steps on GitHub (do not attach full logs)',
-			'diagnostics.runNetworkCheckTitle' => 'Run Network Check',
-			'diagnostics.runNetworkCheckSubtitle' => 'Probe Iwara & GitHub reachability (DNS + connect) to tell DNS pollution from a proxy issue',
-			'diagnostics.networkCheckResultTitle' => 'Network check result',
 			'diagnostics.healthSummaryUnavailable' => 'No log health data yet',
 			'diagnostics.healthMetricsUnavailable' => 'Health metrics have not been collected yet',
 			'diagnostics.healthNoRiskIndicators' => 'No risk indicators detected',
@@ -10141,14 +10106,14 @@ extension on Translations {
 			'log.logCleaningProcessMayNotBeCompleted' => 'Log cleaning process may not be completed',
 			'log.cleanExceededLogs' => 'Clean exceeded logs',
 			'log.noLogsToExport' => 'No logs to export',
-			_ => null,
-		} ?? switch (path) {
 			'log.exportingLogs' => 'Exporting logs...',
 			'log.noHistoryLogsToExport' => 'No history logs to export, please try using the app for a while first',
 			'log.selectLogDate' => 'Select Log Date',
 			'log.today' => 'Today',
 			'log.selectMergeRange' => 'Select Merge Range',
 			'log.selectMergeRangeHint' => 'Please select the log time range to merge',
+			_ => null,
+		} ?? switch (path) {
 			'log.selectMergeRangeDays' => ({required Object days}) => 'Recent ${days} days',
 			'log.logStats' => 'Log Stats',
 			'log.todayLogs' => ({required Object count}) => 'Today Logs: ${count} logs',

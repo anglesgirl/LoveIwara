@@ -403,10 +403,6 @@ errors:
     noRouteToHost: 'ホストに到達できません'
     connectionFailed: '接続に失敗しました'
     sslConnectionFailed: 'SSL接続に失敗しました。ネットワーク設定を確認してください'
-    diagnostics:
-      title: 'ログイン失敗 · ネットワーク診断'
-      description: '以下はログイン失敗の実際のネットワーク原因です。「コピー」を押して開発者に送ってください。原因の特定に使います。アカウントやパスワードは含まれません。'
-      detailsLabel: '技術的な詳細'
 friends:
   clickToRestoreFriend: 友達を復元するにはクリックしてください
   friendsList: 友達リスト
@@ -2006,9 +2002,6 @@ diagnostics:
   copySupportEmailTitle: "サポートメールをコピー"
   reportIssueTitle: "問題を報告"
   reportIssueSubtitle: "GitHub に再現手順を記載（完全なログは添付しないでください）"
-  runNetworkCheckTitle: "ネットワーク診断を実行"
-  runNetworkCheckSubtitle: "Iwara と GitHub の到達性（DNS 解決＋接続）を調べ、DNS 汚染とプロキシ問題を切り分けます"
-  networkCheckResultTitle: "ネットワーク診断結果"
   healthSummaryUnavailable: "ログヘルスデータがありません"
   healthMetricsUnavailable: "ヘルス指標がまだ収集されていません"
   healthNoRiskIndicators: "現時点でリスク指標はありません"

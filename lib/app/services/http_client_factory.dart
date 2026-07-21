@@ -89,10 +89,6 @@ class HttpClientFactory {
 
   bool get hasProxy => _proxyHost != null && _proxyPort != null;
 
-  /// 当前应用代理描述（`host:port`）；未配置代理时返回 null。
-  /// 仅用于诊断展示——代理通常是本机梯子端口（如 127.0.0.1:7890），非机密。
-  String? get proxyDescription => hasProxy ? '$_proxyHost:$_proxyPort' : null;
-
   String? _buildProxyRule() {
     if (hasProxy) {
       return 'PROXY $_proxyHost:$_proxyPort; DIRECT';

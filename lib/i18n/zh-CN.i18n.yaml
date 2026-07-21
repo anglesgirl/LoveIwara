@@ -409,10 +409,6 @@ errors:
     noRouteToHost: '无法找到主机'
     connectionFailed: '连接失败'
     sslConnectionFailed: 'SSL连接失败，请检查网络设置'
-    diagnostics:
-      title: '登录失败 · 网络诊断'
-      description: '下面是这次登录失败的真实网络原因。点「复制」后发给开发者，我们据此定位问题。内容不含账号和密码。'
-      detailsLabel: '技术细节'
 friends:
   clickToRestoreFriend: 点击恢复好友
   friendsList: 好友列表
@@ -2009,9 +2005,6 @@ diagnostics:
   copySupportEmailTitle: "复制日志邮箱"
   reportIssueTitle: "反馈问题"
   reportIssueSubtitle: "在 GitHub 提供复现步骤（请勿附完整日志）"
-  runNetworkCheckTitle: "运行网络诊断"
-  runNetworkCheckSubtitle: "探测 Iwara 与 GitHub 的连通性（DNS 解析 + 连接），区分 DNS 污染与代理问题"
-  networkCheckResultTitle: "网络诊断结果"
   healthSummaryUnavailable: "暂无日志健康数据"
   healthMetricsUnavailable: "尚未采集到健康指标"
   healthNoRiskIndicators: "当前未发现风险指标"

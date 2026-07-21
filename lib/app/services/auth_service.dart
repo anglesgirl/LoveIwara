@@ -12,7 +12,6 @@ import 'package:i_iwara/app/services/iwara_site_headers.dart';
 import 'package:i_iwara/app/ui/widgets/md_toast_widget.dart';
 import 'package:i_iwara/i18n/strings.g.dart';
 import 'package:i_iwara/utils/common_utils.dart' show CommonUtils;
-import 'package:i_iwara/utils/network_diagnostics.dart';
 
 import '../../common/constants.dart';
 import '../../utils/logger_utils.dart';
@@ -328,11 +327,8 @@ class AuthService extends GetxService {
         if (!staged.success) {
           LogUtils.e('$_tag 登录换取 access token 失败: ${staged.errorMessage}');
           // 注意：不调用 clearTokens，旧会话(若有)保持不变。
-          // 网络类失败：把 TokenManager 透传的原始错误消息带回 UI，供诊断弹窗展示；
-          // 认证类失败(refresh token 无效)是明确业务错误，仅提示不弹诊断。
           return ApiResult.fail(
             staged.isAuthError ? t.errors.loginFailed : t.errors.networkError,
-            exception: staged.isAuthError ? null : staged.errorMessage,
           );
         }
 
@@ -366,27 +362,18 @@ class AuthService extends GetxService {
           fallback: t.errors.loginFailed,
         ),
       );
-    } catch (e, st) {
-      // 把**真实网络原因**（DioException 类型、底层 errno、CF 拦截头、响应片段、
-      // 以及主动 DNS 解析探测）完整落日志，并把原始异常带回 UI，让登录页弹出可
-      // 复制的诊断给用户分享。DNS 探测能区分「直连被拒/未走代理」与「DNS 污染」。
-      final report = await NetworkDiagnostics.describeAsync(e, stage: 'login');
+    } catch (e) {
       if (e is dio.DioException) {
         LogUtils.e(
-          '$_tag 登录请求异常，网络诊断:\n$report',
-          tag: _tag,
+          '$_tag 登录请求异常 '
+          '(type=${e.type}, status=${e.response?.statusCode}, uri=${e.requestOptions.uri})',
           error: e.response?.data ?? e.message ?? e.error,
           stackTrace: e.stackTrace,
         );
       } else {
-        LogUtils.e(
-          '$_tag 登录失败，网络诊断:\n$report',
-          tag: _tag,
-          error: e,
-          stackTrace: st,
-        );
+        LogUtils.e('$_tag 登录失败', error: e);
       }
-      return ApiResult.fail(_getErrorMessage(e), exception: e);
+      return ApiResult.fail(_getErrorMessage(e));
     }
   }
 

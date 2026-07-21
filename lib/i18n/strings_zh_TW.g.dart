@@ -1684,9 +1684,6 @@ class _TranslationsDiagnosticsZhTw implements TranslationsDiagnosticsEn {
 	@override String get copySupportEmailTitle => '複製日誌信箱';
 	@override String get reportIssueTitle => '回報問題';
 	@override String get reportIssueSubtitle => '在 GitHub 提供重現步驟（請勿附完整日誌）';
-	@override String get runNetworkCheckTitle => '執行網路診斷';
-	@override String get runNetworkCheckSubtitle => '探測 Iwara 與 GitHub 的連通性（DNS 解析 + 連線），區分 DNS 汙染與代理問題';
-	@override String get networkCheckResultTitle => '網路診斷結果';
 	@override String get healthSummaryUnavailable => '暫無日誌健康資料';
 	@override String get healthMetricsUnavailable => '尚未採集到健康指標';
 	@override String get healthNoRiskIndicators => '目前未發現風險指標';
@@ -2277,7 +2274,6 @@ class _TranslationsErrorsNetworkZhTw implements TranslationsErrorsNetworkEn {
 	@override String get noRouteToHost => '無法找到主機';
 	@override String get connectionFailed => '連線失敗';
 	@override String get sslConnectionFailed => 'SSL連線失敗，請檢查網路設定';
-	@override late final _TranslationsErrorsNetworkDiagnosticsZhTw diagnostics = _TranslationsErrorsNetworkDiagnosticsZhTw._(_root);
 }
 
 // Path: settings.keybinding
@@ -3308,18 +3304,6 @@ class _TranslationsAnime4kPresetNamesZhTw implements TranslationsAnime4kPresetNa
 	@override String get mode_a_hq_thin => 'Mode A (HQ) + 線條細化';
 }
 
-// Path: errors.network.diagnostics
-class _TranslationsErrorsNetworkDiagnosticsZhTw implements TranslationsErrorsNetworkDiagnosticsEn {
-	_TranslationsErrorsNetworkDiagnosticsZhTw._(this._root);
-
-	final TranslationsZhTw _root; // ignore: unused_field
-
-	// Translations
-	@override String get title => '登入失敗 · 網路診斷';
-	@override String get description => '下面是這次登入失敗的真實網路原因。點「複製」後傳給開發者，我們據此定位問題。內容不含帳號和密碼。';
-	@override String get detailsLabel => '技術細節';
-}
-
 // Path: videoDetail.cast.deviceTypes
 class _TranslationsVideoDetailCastDeviceTypesZhTw implements TranslationsVideoDetailCastDeviceTypesEn {
 	_TranslationsVideoDetailCastDeviceTypesZhTw._(this._root);
@@ -3758,9 +3742,6 @@ extension on TranslationsZhTw {
 			'errors.network.noRouteToHost' => '無法找到主機',
 			'errors.network.connectionFailed' => '連線失敗',
 			'errors.network.sslConnectionFailed' => 'SSL連線失敗，請檢查網路設定',
-			'errors.network.diagnostics.title' => '登入失敗 · 網路診斷',
-			'errors.network.diagnostics.description' => '下面是這次登入失敗的真實網路原因。點「複製」後傳給開發者，我們據此定位問題。內容不含帳號和密碼。',
-			'errors.network.diagnostics.detailsLabel' => '技術細節',
 			'friends.clickToRestoreFriend' => '點擊復原朋友',
 			'friends.friendsList' => '朋友列表',
 			'friends.friendRequests' => '朋友請求',
@@ -3881,11 +3862,11 @@ extension on TranslationsZhTw {
 			'settings.testProxyFailedWithException' => ({required Object exception}) => '代理請求出錯: ${exception}',
 			'settings.proxyConfig' => '代理設定',
 			'settings.thisIsHttpProxyAddress' => '此為 HTTP 代理伺服器地址',
-			_ => null,
-		} ?? switch (path) {
 			'settings.checkProxy' => '檢查代理',
 			'settings.proxyAddress' => '代理地址',
 			'settings.pleaseEnterTheUrlOfTheProxyServerForExample1270018080' => '請輸入代理伺服器的 URL，例如 127.0.0.1:8080',
+			_ => null,
+		} ?? switch (path) {
 			'settings.enableProxy' => '啟用代理',
 			'settings.left' => '左側',
 			'settings.middle' => '中間',
@@ -4395,11 +4376,11 @@ extension on TranslationsZhTw {
 			'firstTimeSetup.network.description' => '根據您的網路環境進行相應配置',
 			'firstTimeSetup.network.tip' => '設定成功後需重啟應用才會生效',
 			'firstTimeSetup.theme.title' => '主題設定',
-			_ => null,
-		} ?? switch (path) {
 			'firstTimeSetup.theme.subtitle' => '選擇您喜歡的介面主題',
 			'firstTimeSetup.theme.description' => '個人化您的視覺體驗',
 			'firstTimeSetup.player.title' => '播放器設定',
+			_ => null,
+		} ?? switch (path) {
 			'firstTimeSetup.player.subtitle' => '配置播放控制偏好',
 			'firstTimeSetup.player.description' => '您可以在此快速設定常用的播放體驗',
 			'firstTimeSetup.completion.title' => '完成設定',
@@ -4909,11 +4890,11 @@ extension on TranslationsZhTw {
 			'download.deleteByDate.daysUnit' => '天',
 			'download.deleteByDate.olderThanDaysHint' => ({required Object days}) => '刪除 ${days} 天以前建立的任務',
 			'download.deleteByDate.noMatch' => '沒有符合條件的任務',
-			_ => null,
-		} ?? switch (path) {
 			'download.deleteByDate.invalidRange' => '開始日期不能晚於結束日期',
 			'download.deleteByDate.confirmTitle' => '確認刪除',
 			'download.deleteByDate.confirmContent' => ({required Object count}) => '確定刪除這 ${count} 個下載任務及其檔案嗎？此操作無法復原。',
+			_ => null,
+		} ?? switch (path) {
 			'download.deleteByDate.deleting' => ({required Object done, required Object total}) => '正在刪除 ${done}/${total}…',
 			'download.deleteByDate.resultSuccess' => ({required Object count}) => '已刪除 ${count} 個任務',
 			'download.deleteByDate.resultPartial' => ({required Object deleted, required Object skipped}) => '已刪除 ${deleted} 個任務，略過 ${skipped} 個（被佔用）',
@@ -5278,9 +5259,6 @@ extension on TranslationsZhTw {
 			'diagnostics.copySupportEmailTitle' => '複製日誌信箱',
 			'diagnostics.reportIssueTitle' => '回報問題',
 			'diagnostics.reportIssueSubtitle' => '在 GitHub 提供重現步驟（請勿附完整日誌）',
-			'diagnostics.runNetworkCheckTitle' => '執行網路診斷',
-			'diagnostics.runNetworkCheckSubtitle' => '探測 Iwara 與 GitHub 的連通性（DNS 解析 + 連線），區分 DNS 汙染與代理問題',
-			'diagnostics.networkCheckResultTitle' => '網路診斷結果',
 			'diagnostics.healthSummaryUnavailable' => '暫無日誌健康資料',
 			'diagnostics.healthMetricsUnavailable' => '尚未採集到健康指標',
 			'diagnostics.healthNoRiskIndicators' => '目前未發現風險指標',
@@ -5423,14 +5401,14 @@ extension on TranslationsZhTw {
 			'emoji.formatExample' => '格式範例:\n["url1", "url2", "url3"]',
 			'emoji.pasteJsonUrlArray' => '請貼上JSON格式的URL陣列',
 			'emoji.import' => '匯入',
-			_ => null,
-		} ?? switch (path) {
 			'emoji.importSuccess' => ({required Object count}) => '成功匯入${count}張圖片',
 			'emoji.jsonFormatError' => 'JSON格式錯誤，請檢查輸入',
 			'emoji.createGroup' => '建立表情包分組',
 			'emoji.groupName' => '分組名稱',
 			'emoji.enterGroupName' => '請輸入分組名稱',
 			'emoji.create' => '建立',
+			_ => null,
+		} ?? switch (path) {
 			'emoji.editGroupName' => '編輯分組名稱',
 			'emoji.save' => '儲存',
 			'emoji.deleteGroup' => '刪除分組',
