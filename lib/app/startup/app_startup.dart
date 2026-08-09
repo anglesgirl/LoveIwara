@@ -510,15 +510,23 @@ class MyHttpOverrides extends HttpOverrides {
   HttpClient createHttpClient(SecurityContext? context) {
     final client = super.createHttpClient(context);
     client.idleTimeout = const Duration(seconds: 90);
+    // MITM 模式：本地代理自签证书，跳过校验（隧道内流量由代理 ECH 保护）
+    client.badCertificateCallback = (cert, host, port) => true;
 
     // 干净 DoH 解析：所有 HttpClient 流量（API/图片/Image.network）先查干净 DNS，
     // 绕开运营商污染（iwara.tv 全域名被污染为假 IP → 直连真实 CF IP）
-    client.connectionFactory = (host, port, options) async {
-      final ip = await DoHResolver.resolve(host);
-      if (ip == null) {
-        return Socket.connect(host, port, timeout: const Duration(seconds: 10));
+    client.connectionFactory = (Uri url, String? proxyHost, int? proxyPort) {
+      // 若启用了 HTTP 代理（findProxy），这里不干预，交给代理处理
+      if (proxyHost != null && proxyHost.isNotEmpty) {
+        return Socket.startConnect(url.host, url.port);
       }
-      return Socket.connect(ip, port, timeout: const Duration(seconds: 10));
+      // DoH 干净解析后直连真实 IP
+      return Future.value(DoHResolver.resolve(url.host)).then((ip) {
+        final Future<Socket> conn = ip == null
+            ? Socket.connect(url.host, url.port, timeout: const Duration(seconds: 10))
+            : Socket.connect(ip, url.port, timeout: const Duration(seconds: 10));
+        return ConnectionTask.fromSocket(conn);
+      });
     };
 
     if (proxy != null && proxy!.isNotEmpty) {

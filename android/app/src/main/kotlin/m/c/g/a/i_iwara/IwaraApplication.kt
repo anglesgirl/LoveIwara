@@ -52,6 +52,8 @@ class IwaraApplication : Application() {
         scope.launch {
             try {
                 val cachePath = File(cacheDir, "ech-cache").absolutePath
+                // MITM 模式：播放器/图片/API 都能走 ECH（客户端跳过证书校验即可）
+                Echproxy.setMitm(true)
                 // gomobile：仅返回 error 的 Go 函数映射为 Unit，错误通过异常抛出
                 Echproxy.start(LISTEN, DOH, cachePath, false)
                 proxyRunning = true

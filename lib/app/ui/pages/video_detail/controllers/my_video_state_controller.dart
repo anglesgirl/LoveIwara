@@ -800,6 +800,14 @@ class MyVideoStateController extends GetxController
             finalProxyUrl = 'http://$proxyUrl';
           }
           (player.platform as dynamic).setProperty('http-proxy', finalProxyUrl);
+          // MITM 模式：本地代理自签证书，播放器跳过证书校验（否则握手失败）
+          try {
+            (player.platform as dynamic).setProperty('tls-verify', 'no');
+          } catch (_) {}
+          LogUtils.i(
+            '播放器已配置 ECH 代理: $finalProxyUrl (tls-verify=no)',
+            'MyVideoStateController',
+          );
         }
       }
 
