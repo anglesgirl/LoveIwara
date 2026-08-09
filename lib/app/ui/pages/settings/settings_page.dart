@@ -383,7 +383,7 @@ class _SettingsPageState extends State<SettingsPage> {
             icon: Icons.download,
             index: ProxyUtil.isSupportedPlatform() ? 5 : 4,
           ),
-          const _SettingItem(
+          _SettingItem(
             title: 'ECH 代理',
             icon: Icons.lock_outline,
             index: 13,
