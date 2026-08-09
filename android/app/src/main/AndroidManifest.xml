@@ -14,6 +14,7 @@
         android:icon="@mipmap/ic_launcher"
         android:requestLegacyExternalStorage="true"
         android:enableOnBackInvokedCallback="false"
+        android:usesCleartextTraffic="true"
         android:fullBackupContent="@xml/backup_rules"
         android:dataExtractionRules="@xml/data_extraction_rules">
         <!-- 大屏（平板 sw>=600dp）方向修复：Android 16 (API 36) 起系统默认忽略 App 的
