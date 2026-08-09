@@ -36,10 +36,6 @@ jobs:
   build-android:
     if: ${{ inputs.build_android }}
     runs-on: ubuntu-latest
-    env:
-      KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-      KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-      KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
     steps:
       - name: Free Disk Space
@@ -76,6 +72,16 @@ jobs:
 
       - name: Get dependencies
         run: flutter pub get
+
+      - name: Setup signing keystore
+        run: |
+          keytool -genkeypair -v -keystore android/app/keystore.jks -alias fongmi \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass fongmi123 -keypass fongmi123 \
+            -dname "CN=AnglesGirl,O=AnglesGirl,C=CN" 2>/dev/null
+          echo "KEYSTORE_PASSWORD=fongmi123" >> $GITHUB_ENV
+          echo "KEY_ALIAS=fongmi" >> $GITHUB_ENV
+          echo "KEY_PASSWORD=fongmi123" >> $GITHUB_ENV
 
       - name: Build APK
         run: flutter build apk --release
