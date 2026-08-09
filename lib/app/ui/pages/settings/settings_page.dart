@@ -5,6 +5,7 @@ import 'package:i_iwara/app/services/app_service.dart';
 import 'package:i_iwara/app/ui/pages/settings/widgets/settings_app_bar.dart';
 import 'package:i_iwara/app/ui/widgets/media_query_insets_fix.dart';
 import 'translation_settings_page.dart';
+import 'ech_proxy_page.dart';
 
 import '../../../../utils/proxy/proxy_util.dart';
 import 'app_settings_page.dart';
@@ -382,6 +383,11 @@ class _SettingsPageState extends State<SettingsPage> {
             icon: Icons.download,
             index: ProxyUtil.isSupportedPlatform() ? 5 : 4,
           ),
+          const _SettingItem(
+            title: 'ECH 代理',
+            icon: Icons.lock_outline,
+            index: 13,
+          ),
         ],
       ),
       _SettingGroup(
@@ -610,6 +616,8 @@ class _SettingsPageState extends State<SettingsPage> {
         return AboutPage(isWideScreen: enableTwoViews);
       case 11: // 诊断与反馈
         return DiagnosticsPage(isWideScreen: enableTwoViews);
+      case 13: // ECH 代理
+        return const EchProxyPage();
       default:
         return const SizedBox();
     }

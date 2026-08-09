@@ -28,6 +28,7 @@ class MainActivity : FlutterActivity() {
     private val FILE_HANDLER_CHANNEL = "com.example.i_iwara/file_handler"
     private val DEVICE_FORM_FACTOR_CHANNEL = "i_iwara/device_form_factor"
     private val ORIENTATION_CHANNEL = "i_iwara/orientation"
+    private val ECH_CHANNEL = "i_iwara/ech_proxy"
 
     private var volumeKeyEnabled = false
     private var fileHandlerChannel: MethodChannel? = null
@@ -108,7 +109,31 @@ class MainActivity : FlutterActivity() {
                     }
                 }
 
-        // 初始化文件处理 MethodChannel
+        // ECH 代理通道：状态 / 开关 / 测试 / 诊断
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, ECH_CHANNEL)
+                .setMethodCallHandler { call, result ->
+                    when (call.method) {
+                        "getStatus" -> {
+                            result.success((application as IwaraApplication).getStatus())
+                        }
+                        "toggle" -> {
+                            (application as IwaraApplication).toggleProxy()
+                            result.success(null)
+                        }
+                        "test" -> {
+                            val host = call.argument<String>("host") ?: "www.iwara.tv"
+                            mainScope.launch {
+                                result.success(proxyTest(host))
+                            }
+                        }
+                        "diagnostics" -> {
+                            result.success((application as IwaraApplication).diag())
+                        }
+                        else -> result.notImplemented()
+                    }
+                }
+
+        // 文件处理 MethodChannel
         fileHandlerChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, FILE_HANDLER_CHANNEL)
         fileHandlerChannel?.setMethodCallHandler { call, result ->
             when (call.method) {
@@ -334,6 +359,32 @@ class MainActivity : FlutterActivity() {
             }
         } catch (e: Exception) {
             Log.w("MainActivity", "清理缓存文件失败: ${e.message}")
+        }
+    }
+
+    /** 走本地 ECH 代理测试目标域名连通性（HTTP CONNECT → DoH 解析 → 真实 IP） */
+    private fun proxyTest(host: String): String {
+        val sb = StringBuilder()
+        sb.append("=== 测试 $host ===\n")
+        if (!(application as IwaraApplication).isProxyRunning()) {
+            return sb.append("❌ 代理未运行，先启动\n").toString()
+        }
+        return try {
+            val port = (application as IwaraApplication).proxyPort()
+            val url = java.net.URL("https://$host/")
+            val conn = url.openConnection(
+                java.net.Proxy(java.net.Proxy.Type.HTTP, java.net.InetSocketAddress("127.0.0.1", port))
+            ) as java.net.HttpURLConnection
+            conn.connectTimeout = 12000
+            conn.readTimeout = 12000
+            conn.instanceFollowRedirects = false
+            val code = conn.responseCode
+            sb.append("HTTP $code\n")
+            sb.append(if (code in 200..399) "✅ 连接成功" else "⚠️ 响应 $code（可能 CF 验证）")
+            sb.toString()
+        } catch (e: Exception) {
+            sb.append("❌ 失败: ${e.message}\n")
+            sb.toString()
         }
     }
 

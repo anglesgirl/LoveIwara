@@ -71,4 +71,39 @@ class IwaraApplication : Application() {
             "status" to proxyStatus
         )
     }
+
+    /** 开关代理（UI 调用） */
+    fun toggleProxy() {
+        if (proxyRunning) {
+            stopProxy()
+        } else {
+            startEchProxy()
+        }
+    }
+
+    fun isProxyRunning(): Boolean = proxyRunning
+
+    fun proxyPort(): Int = LISTEN.substringAfterLast(':').toIntOrNull() ?: 8080
+
+    /** Go 内部诊断日志 */
+    fun diag(): String {
+        return try {
+            Echproxy.diagnostics()
+        } catch (e: Throwable) {
+            "diagnostics error: $e"
+        }
+    }
+
+    private fun stopProxy() {
+        scope.launch {
+            try {
+                Echproxy.stop()
+                proxyRunning = false
+                proxyStatus = "stopped"
+                Log.i(TAG, "ECH proxy stopped")
+            } catch (e: Throwable) {
+                proxyStatus = "stop failed: $e"
+            }
+        }
+    }
 }
