@@ -75,6 +75,7 @@ jobs:
 
       - name: Setup signing keystore
         run: |
+          rm -f android/app/keystore.jks
           keytool -genkeypair -v -keystore android/app/keystore.jks -alias fongmi \
             -keyalg RSA -keysize 2048 -validity 10000 \
             -storepass fongmi123 -keypass fongmi123 \
