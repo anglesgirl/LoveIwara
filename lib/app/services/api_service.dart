@@ -20,6 +20,7 @@ import 'http_client_factory.dart';
 import 'iwara_network_service.dart';
 import 'iwara_site_headers.dart';
 import 'package:i_iwara/utils/common_utils.dart';
+import 'package:i_iwara/utils/ech_target_interceptor.dart';
 
 /// API 服务配置
 class ApiServiceConfig {
@@ -106,7 +107,8 @@ class ApiService extends GetxService {
       return this;
     }
 
-    // 添加拦截器
+    // 添加拦截器：ECH 传输优先（最前），再原有拦截链
+    _dio.interceptors.add(EchTargetInterceptor());
     _dio.interceptors.add(_createInterceptor());
     _interceptorAdded = true;
 

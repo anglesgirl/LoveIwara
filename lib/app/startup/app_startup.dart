@@ -49,7 +49,6 @@ import 'package:i_iwara/app/ui/pages/video_detail/controllers/dlna_cast_service.
 import 'package:i_iwara/db/database_service.dart';
 import 'package:i_iwara/i18n/strings.g.dart' as slang;
 import 'package:i_iwara/utils/glsl_shader_service.dart';
-import 'package:i_iwara/utils/doh_resolver.dart';
 import 'package:i_iwara/utils/logger_utils.dart';
 import 'package:i_iwara/utils/proxy/proxy_util.dart';
 import 'package:media_kit/media_kit.dart';
@@ -510,14 +509,6 @@ class MyHttpOverrides extends HttpOverrides {
   HttpClient createHttpClient(SecurityContext? context) {
     final client = super.createHttpClient(context);
     client.idleTimeout = const Duration(seconds: 90);
-    // 干净 DoH 解析（与 HttpClientFactory 一致，覆盖 MyHttpOverrides 路径）
-    client.connectionFactory = (host, port, options) async {
-      final ip = await DoHResolver.resolve(host);
-      if (ip == null) {
-        return Socket.connect(host, port, timeout: const Duration(seconds: 10));
-      }
-      return Socket.connect(ip, port, timeout: const Duration(seconds: 10));
-    };
 
     if (proxy != null && proxy!.isNotEmpty) {
       client.findProxy = (uri) => 'PROXY $proxy; DIRECT';

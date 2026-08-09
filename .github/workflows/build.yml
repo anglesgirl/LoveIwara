@@ -84,6 +84,31 @@ jobs:
           echo "KEY_ALIAS=fongmi" >> $GITHUB_ENV
           echo "KEY_PASSWORD=fongmi123" >> $GITHUB_ENV
 
+      # 用 Go 1.26 编译 ech-proxy-go → aar（复用统一 ECH 传输层）
+      - name: Checkout ech-proxy-go
+        uses: actions/checkout@v4
+        with:
+          repository: anglesgirl/ech-proxy-go
+          path: ech-proxy-go
+
+      - name: Setup Go 1.26
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26.5'
+          cache-dependency-path: ech-proxy-go/go.sum
+
+      - name: Build ECH proxy aar
+        working-directory: ech-proxy-go
+        run: |
+          export PATH=$PATH:$(go env GOPATH)/bin
+          export ANDROID_HOME=$ANDROID_SDK_ROOT
+          go install golang.org/x/mobile/cmd/gomobile@latest
+          export PATH=$PATH:$(go env GOPATH)/bin
+          gomobile init
+          mkdir -p ../android/app/libs
+          gomobile bind -target=android -androidapi 26 -o ../android/app/libs/echproxy.aar ./mobile/echproxy
+        shell: bash
+
       - name: Build APK
         run: flutter build apk --release
 
