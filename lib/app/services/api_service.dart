@@ -20,7 +20,6 @@ import 'http_client_factory.dart';
 import 'iwara_network_service.dart';
 import 'iwara_site_headers.dart';
 import 'package:i_iwara/utils/common_utils.dart';
-import 'package:i_iwara/utils/ech_target_interceptor.dart';
 
 /// API 服务配置
 class ApiServiceConfig {
