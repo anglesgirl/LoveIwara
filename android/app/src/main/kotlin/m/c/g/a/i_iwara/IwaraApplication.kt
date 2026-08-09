@@ -54,7 +54,7 @@ class IwaraApplication : Application() {
                 val cachePath = File(cacheDir, "ech-cache").absolutePath
                 // gomobile：仅返回 error 的 Go 函数映射为 Unit，错误通过异常抛出
                 Echproxy.start(LISTEN, DOH, cachePath, false)
-                isRunning = true
+                proxyRunning = true
                 proxyStatus = "running on $LISTEN"
                 Log.i(TAG, "ECH proxy started: $proxyStatus")
             } catch (e: Throwable) {
@@ -67,7 +67,7 @@ class IwaraApplication : Application() {
     /** Flutter 查询代理状态 */
     fun getStatus(): Map<String, Any?> {
         return mapOf(
-            "running" to isRunning,
+            "running" to proxyRunning,
             "status" to proxyStatus
         )
     }
