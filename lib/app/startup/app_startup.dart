@@ -513,24 +513,19 @@ class MyHttpOverrides extends HttpOverrides {
     // MITM 模式：本地代理自签证书，跳过校验（隧道内流量由代理 ECH 保护）
     client.badCertificateCallback = (cert, host, port) => true;
 
-    // 干净 DoH 解析：所有 HttpClient 流量（API/图片/Image.network）先查干净 DNS，
-    // 绕开运营商污染（iwara.tv 全域名被污染为假 IP → 直连真实 CF IP）
-    client.connectionFactory = (Uri url, String? proxyHost, int? proxyPort) {
-      // 若启用了 HTTP 代理（findProxy），这里不干预，交给代理处理
-      if (proxyHost != null && proxyHost.isNotEmpty) {
-        return Socket.startConnect(url.host, url.port);
-      }
-      // DoH 干净解析后直连真实 IP
-      return Future.value(DoHResolver.resolve(url.host)).then((ip) {
-        final Future<Socket> conn = ip == null
-            ? Socket.connect(url.host, url.port, timeout: const Duration(seconds: 10))
-            : Socket.connect(ip, url.port, timeout: const Duration(seconds: 10));
-        return ConnectionTask.fromSocket(conn);
-      });
-    };
-
     if (proxy != null && proxy!.isNotEmpty) {
+      // 走代理：CONNECT 由 HttpClient 内部处理，DoH/ECH 全在 Go 代理侧
       client.findProxy = (uri) => 'PROXY $proxy; DIRECT';
+    } else {
+      // 无代理：干净 DoH 解析直连真实 IP（绕开运营商污染）
+      client.connectionFactory = (Uri url, String? proxyHost, int? proxyPort) {
+        return Future.value(DoHResolver.resolve(url.host)).then((ip) {
+          final Future<Socket> conn = ip == null
+              ? Socket.connect(url.host, url.port, timeout: const Duration(seconds: 10))
+              : Socket.connect(ip, url.port, timeout: const Duration(seconds: 10));
+          return ConnectionTask.fromSocket(conn);
+        });
+      };
     }
 
     return client;
