@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 
+import '../../utils/doh_resolver.dart';
 import '../../utils/logger_utils.dart';
 
 /// 共享 HttpClient 工厂
@@ -103,8 +104,17 @@ class HttpClientFactory {
   HttpClient createHttpClient() {
     if (_httpClient != null) return _httpClient!;
 
-    _httpClient = HttpClient();
-    _httpClient!.idleTimeout = const Duration(seconds: 90);
+    _httpClient = HttpClient()
+      ..idleTimeout = const Duration(seconds: 90)
+      // 干净 DoH 解析：绕开运营商 DNS 污染（iwara.tv 等被污染域名直连真实 IP）
+      ..connectionFactory = (host, port, options) async {
+        final ip = await DoHResolver.resolve(host);
+        if (ip == null) {
+          // DoH 失败回退系统解析
+          return Socket.connect(host, port, timeout: const Duration(seconds: 10));
+        }
+        return Socket.connect(ip, port, timeout: const Duration(seconds: 10));
+      };
     final proxyRule = _buildProxyRule();
     if (proxyRule != null) {
       _httpClient!.findProxy = (uri) => proxyRule;
@@ -113,7 +123,8 @@ class HttpClientFactory {
     LogUtils.d(
       '$_tag 创建共享 HttpClient '
       '(idleTimeout: ${_httpClient!.idleTimeout}, '
-      'proxy: ${hasProxy ? "$_proxyHost:$_proxyPort" : "none"})',
+      'proxy: ${hasProxy ? "$_proxyHost:$_proxyPort" : "none"}, '
+      'doh: enabled)',
     );
 
     return _httpClient!;
