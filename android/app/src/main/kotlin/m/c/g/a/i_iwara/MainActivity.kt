@@ -362,7 +362,7 @@ class MainActivity : FlutterActivity() {
         }
     }
 
-    /** 走本地 ECH 代理测试目标域名连通性（HTTP CONNECT → DoH 解析 → 真实 IP） */
+    /** 走内置 ECH 代理测试目标（X-Ech-Target 应用层模式，明确拿 HTTP 状态码） */
     private fun proxyTest(host: String): String {
         val sb = StringBuilder()
         sb.append("=== 测试 $host ===\n")
@@ -371,10 +371,10 @@ class MainActivity : FlutterActivity() {
         }
         return try {
             val port = (application as IwaraApplication).proxyPort()
-            val url = java.net.URL("https://$host/")
-            val conn = url.openConnection(
-                java.net.Proxy(java.net.Proxy.Type.HTTP, java.net.InetSocketAddress("127.0.0.1", port))
-            ) as java.net.HttpURLConnection
+            // 直接请求本地代理 + X-Ech-Target 头（Go 做 DoH/ECH，明文返回）
+            val url = java.net.URL("http://127.0.0.1:$port/")
+            val conn = url.openConnection() as java.net.HttpURLConnection
+            conn.setRequestProperty("X-Ech-Target", host)
             conn.connectTimeout = 12000
             conn.readTimeout = 12000
             conn.instanceFollowRedirects = false
@@ -383,7 +383,7 @@ class MainActivity : FlutterActivity() {
             sb.append(if (code in 200..399) "✅ 连接成功" else "⚠️ 响应 $code（可能 CF 验证）")
             sb.toString()
         } catch (e: Exception) {
-            sb.append("❌ 失败: ${e.message}\n")
+            sb.append("❌ 失败: ${e.message ?: e.javaClass.simpleName}\n")
             sb.toString()
         }
     }
