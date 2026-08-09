@@ -107,8 +107,7 @@ class ApiService extends GetxService {
       return this;
     }
 
-    // 添加拦截器：ECH 传输优先（最前），再原有拦截链
-    _dio.interceptors.add(EchTargetInterceptor());
+    // 添加拦截器（原有逻辑）
     _dio.interceptors.add(_createInterceptor());
     _interceptorAdded = true;
 

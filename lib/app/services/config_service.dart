@@ -689,9 +689,9 @@ extension ConfigKeyExtension on ConfigKey {
         // PC 端默认开启「记住音量」，移动端默认关闭
         return GetPlatform.isDesktop;
       case ConfigKey.USE_PROXY:
-        return false;
+        return true; // 内置 ECH 代理默认启用（127.0.0.1:8080）
       case ConfigKey.PROXY_URL:
-        return '';
+        return '127.0.0.1:8080';
       case ConfigKey.RENDER_VERTICAL_VIDEO_IN_VERTICAL_SCREEN:
         return true;
       case ConfigKey.ACTIVE_BACKGROUND_PRIVACY_MODE:
