@@ -18,6 +18,16 @@
         android:networkSecurityConfig="@xml/network_security_config"
         android:fullBackupContent="@xml/backup_rules"
         android:dataExtractionRules="@xml/data_extraction_rules">
+        <!-- FileProvider for sharing files (e.g. CA cert) with system intents -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
         <!-- 大屏（平板 sw>=600dp）方向修复：Android 16 (API 36) 起系统默认忽略 App 的
              screenOrientation / setRequestedOrientation，导致平板竖持点全屏转不到横屏。
              下面两条声明让本 App 保留自己的方向控制：

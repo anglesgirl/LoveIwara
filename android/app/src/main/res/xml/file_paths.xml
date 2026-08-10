@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Public Download directory for CA certificate -->
+    <external-path name="downloads" path="Download/" />
+    <!-- Fallback: external storage root (requires MANAGE_EXTERNAL_STORAGE) -->
+    <external-path name="external_root" path="." />
+</paths>
