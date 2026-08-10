@@ -96,19 +96,30 @@ class IwaraApplication : Application() {
         }
     }
 
-    /** 导出 MITM CA 证书到公共目录（供用户安装信任） */
+    /** 导出 MITM CA 证书到公共下载目录（系统证书安装器可访问） */
     fun exportCA(): String {
         return try {
             val pem = Echproxy.getCAPem()
             if (pem.isEmpty()) return "CA not available (MITM not enabled or proxy not running)"
-            // 写到公共 Download 目录，系统证书安装器可访问
-            val file = File(getExternalFilesDir(android.os.Environment.DIRECTORY_DOWNLOADS), "ech_proxy_ca.crt")
-            file.parentFile?.mkdirs()
+            // 真正的公共 Download 目录：/storage/emulated/0/Download/
+            val publicDownloadDir = android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOWNLOADS)
+            publicDownloadDir.mkdirs()
+            val file = File(publicDownloadDir, "ech_proxy_ca.crt")
             file.writeText(pem)
-            // 同时也复制一份到 /sdcard/ 根目录方便用户找到
-            val file2 = File(android.os.Environment.getExternalStorageDirectory(), "ech_proxy_ca.crt")
-            file2.writeText(pem)
-            "已导出到: ${file.absolutePath} 和 ${file2.absolutePath}\n请在系统设置→安全→安装证书→CA证书中选择任一文件"
+            // 兼容 Android 10+：同时用 MediaStore 插入 Downloads 集合，让系统文件管理器立即可见
+            try {
+                val resolver = contentResolver
+                val values = android.content.ContentValues().apply {
+                    put(android.provider.MediaStore.MediaColumns.DISPLAY_NAME, "ech_proxy_ca.crt")
+                    put(android.provider.MediaStore.MediaColumns.MIME_TYPE, "application/x-x509-ca-cert")
+                    put(android.provider.MediaStore.MediaColumns.RELATIVE_PATH, android.os.Environment.DIRECTORY_DOWNLOADS)
+                }
+                val uri = resolver.insert(android.provider.MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)
+                uri?.let { resolver.openOutputStream(it)?.use { it.write(pem.toByteArray()) } }
+            } catch (e: Throwable) {
+                Log.w(TAG, "MediaStore insert failed (non-fatal): $e")
+            }
+            "已导出到公共下载目录: ${file.absolutePath}\n请在系统设置→安全→安装证书→CA证书中选择该文件"
         } catch (e: Throwable) {
             "export CA failed: $e"
         }
