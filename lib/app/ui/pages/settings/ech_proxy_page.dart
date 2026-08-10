@@ -90,19 +90,6 @@ class _EchProxyPageState extends State<EchProxyPage> {
     }
   }
 
-  Future<void> _exportCA() async {
-    setState(() => _busy = true);
-    try {
-      final r = await _channel.invokeMethod('exportCA');
-      if (mounted) {
-        setState(() => _testResult = 'CA 证书导出: $r\n请在系统设置 → 安全 → 安装证书 → CA 证书 中选择该文件');
-      }
-    } catch (e) {
-      if (mounted) setState(() => _testResult = '导出失败: $e');
-    }
-    if (mounted) setState(() => _busy = false);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -192,19 +179,13 @@ class _EchProxyPageState extends State<EchProxyPage> {
           ],
           const SizedBox(height: 16),
 
-          // 诊断 & CA 证书
+          // 诊断
           Row(
             children: [
               ElevatedButton(
                 onPressed: _getDiag,
                 style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00695C)),
                 child: const Text('🔬 Go 诊断'),
-              ),
-              const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: _busy ? null : _exportCA,
-                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF6A1B9A)),
-                child: const Text('📜 导出 CA 证书'),
               ),
             ],
           ),

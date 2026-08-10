@@ -58,8 +58,9 @@ class IwaraApplication : Application() {
         scope.launch {
             try {
                 val cachePath = File(cacheDir, "ech-cache").absolutePath
-                // MITM 模式：播放器/图片/API 都能走 ECH（客户端跳过证书校验即可）
-                Echproxy.setMitm(true)
+                // 普通 CONNECT 隧道模式（无 MITM、零证书）：客户端 TLS 直连真实服务器，
+                // DoH 干净解析去污染；iwara 是纯 DNS 污染不需要 MITM/ECH
+                Echproxy.setMitm(false)
                 // gomobile：仅返回 error 的 Go 函数映射为 Unit，错误通过异常抛出
                 Echproxy.start(LISTEN, DOH, cachePath, false)
                 proxyRunning = true

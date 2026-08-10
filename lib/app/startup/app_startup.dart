@@ -419,19 +419,9 @@ class AppStartupCoordinator implements AppStartupRunner {
       if (useProxy && proxyUrl != null && proxyUrl.isNotEmpty) {
         HttpOverrides.global = MyHttpOverrides(proxyUrl);
         HttpClientFactory.instance.setProxy(proxyUrl);
-        
-        // MITM 模式：加载 CA 证书（从原生导出的文件）
-        try {
-          final channel = const MethodChannel('i_iwara/ech_proxy');
-          final caPath = await channel.invokeMethod('exportCA') as String?;
-          if (caPath != null && !caPath.startsWith('CA not available') && !caPath.startsWith('export CA failed')) {
-            final caPem = File(caPath).readAsStringSync();
-            await HttpClientFactory.instance.setTrustedCA(caPem);
-          }
-        } catch (e) {
-          LogUtils.w('加载 MITM CA 失败，将使用 badCertificateCallback 兜底: $e', '启动初始化');
-        }
-        
+
+        // 普通 CONNECT 隧道（无 MITM）：客户端 TLS 直连真实服务器，证书天然有效，
+        // 无需导出/安装 CA 证书，无需跳过证书校验
         LogUtils.i('代理设置完成: $proxyUrl', '启动初始化');
         return;
       }
@@ -525,11 +515,10 @@ class MyHttpOverrides extends HttpOverrides {
   HttpClient createHttpClient(SecurityContext? context) {
     final client = super.createHttpClient(context);
     client.idleTimeout = const Duration(seconds: 90);
-    // MITM 模式：本地代理自签证书，跳过校验（隧道内流量由代理 ECH 保护）
-    client.badCertificateCallback = (cert, host, port) => true;
+    // 普通 CONNECT 隧道：TLS 直连真实服务器，走系统默认证书校验（无需跳校验）
 
     if (proxy != null && proxy!.isNotEmpty) {
-      // 走代理：CONNECT 由 HttpClient 内部处理，DoH/ECH 全在 Go 代理侧
+      // 走代理：CONNECT 由 HttpClient 内部处理，DoH 去污染在 Go 代理侧
       client.findProxy = (uri) => 'PROXY $proxy; DIRECT';
     }
 
