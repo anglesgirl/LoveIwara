@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 /// - 查询/开关代理状态
 /// - 连通性测试（任意域名）
 /// - Go 内部诊断日志
+/// - 导出 MITM CA 证书（安装信任后 HTTPS 图片/视频正常显示）
 class EchProxyPage extends StatefulWidget {
   const EchProxyPage({super.key});
 
@@ -87,6 +88,19 @@ class _EchProxyPageState extends State<EchProxyPage> {
     } catch (e) {
       if (mounted) setState(() => _diag = '诊断失败: $e');
     }
+  }
+
+  Future<void> _exportCA() async {
+    setState(() => _busy = true);
+    try {
+      final r = await _channel.invokeMethod('exportCA');
+      if (mounted) {
+        setState(() => _testResult = 'CA 证书导出: $r\n请在系统设置 → 安全 → 安装证书 → CA 证书 中选择该文件');
+      }
+    } catch (e) {
+      if (mounted) setState(() => _testResult = '导出失败: $e');
+    }
+    if (mounted) setState(() => _busy = false);
   }
 
   @override
@@ -178,7 +192,7 @@ class _EchProxyPageState extends State<EchProxyPage> {
           ],
           const SizedBox(height: 16),
 
-          // 诊断
+          // 诊断 & CA 证书
           Row(
             children: [
               ElevatedButton(
@@ -187,9 +201,16 @@ class _EchProxyPageState extends State<EchProxyPage> {
                 child: const Text('🔬 Go 诊断'),
               ),
               const SizedBox(width: 8),
-              const Text('日志自动写入文件', style: TextStyle(color: Colors.white54, fontSize: 12)),
+              ElevatedButton(
+                onPressed: _busy ? null : _exportCA,
+                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF6A1B9A)),
+                child: const Text('📜 导出 CA 证书'),
+              ),
             ],
           ),
+          const SizedBox(width: 8),
+          const Text('日志自动写入文件', style: TextStyle(color: Colors.white54, fontSize: 12)),
+          const SizedBox(height: 16),
           if (_diag.isNotEmpty) ...[
             const SizedBox(height: 8),
             Container(

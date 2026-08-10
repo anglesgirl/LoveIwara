@@ -96,6 +96,19 @@ class IwaraApplication : Application() {
         }
     }
 
+    /** 导出 MITM CA 证书到文件（供用户安装信任） */
+    fun exportCA(): String {
+        return try {
+            val pem = Echproxy.getCAPem()
+            if (pem.isEmpty()) return "CA not available (MITM not enabled or proxy not running)"
+            val file = File(cacheDir, "ech_proxy_ca.crt")
+            file.writeText(pem)
+            file.absolutePath
+        } catch (e: Throwable) {
+            "export CA failed: $e"
+        }
+    }
+
     private fun stopProxy() {
         scope.launch {
             try {

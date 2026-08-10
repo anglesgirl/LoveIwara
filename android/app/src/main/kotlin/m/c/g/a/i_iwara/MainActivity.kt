@@ -129,6 +129,9 @@ class MainActivity : FlutterActivity() {
                         "diagnostics" -> {
                             result.success((application as IwaraApplication).diag())
                         }
+                        "exportCA" -> {
+                            result.success((application as IwaraApplication).exportCA())
+                        }
                         else -> result.notImplemented()
                     }
                 }

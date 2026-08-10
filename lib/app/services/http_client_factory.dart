@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 
 import '../../utils/logger_utils.dart';
 
@@ -19,6 +20,7 @@ class HttpClientFactory {
   HttpClient? _httpClient;
   String? _proxyHost;
   int? _proxyPort;
+  SecurityContext? _customSecurityContext;
 
   /// 设置代理地址。传 null 表示不使用代理。
   /// 格式: "host:port" 或 "http://host:port"
@@ -26,6 +28,7 @@ class HttpClientFactory {
     if (proxyUrl == null || proxyUrl.isEmpty) {
       _proxyHost = null;
       _proxyPort = null;
+      _customSecurityContext = null;
       LogUtils.d('$_tag 代理已清除');
     } else {
       try {
@@ -37,6 +40,7 @@ class HttpClientFactory {
         // 代理配置异常时清空应用代理，避免启动阶段中断
         _proxyHost = null;
         _proxyPort = null;
+        _customSecurityContext = null;
         LogUtils.e(
           '$_tag 代理地址无效，已清空应用代理配置: $proxyUrl',
           tag: _tag,
@@ -46,6 +50,31 @@ class HttpClientFactory {
       }
     }
     // 代理变更时重建 HttpClient
+    reset();
+  }
+
+  /// 设置自定义 CA 证书（PEM 格式），用于 MITM 代理信任
+  /// 传 null 表示使用系统默认信任库
+  Future<void> setTrustedCA(String? caPem) async {
+    if (caPem == null || caPem.isEmpty) {
+      _customSecurityContext = null;
+      LogUtils.d('$_tag 清除自定义 CA');
+    } else {
+      try {
+        final context = SecurityContext(withTrustedRoots: true);
+        context.setTrustedCertificatesBytes(caPem.codeUnits);
+        _customSecurityContext = context;
+        LogUtils.d('$_tag 自定义 CA 已加载');
+      } catch (e, stackTrace) {
+        _customSecurityContext = null;
+        LogUtils.e(
+          '$_tag 自定义 CA 加载失败: $e',
+          tag: _tag,
+          error: e,
+          stackTrace: stackTrace,
+        );
+      }
+    }
     reset();
   }
 
@@ -103,7 +132,7 @@ class HttpClientFactory {
   HttpClient createHttpClient() {
     if (_httpClient != null) return _httpClient!;
 
-    _httpClient = HttpClient();
+    _httpClient = HttpClient(context: _customSecurityContext);
     _httpClient!.idleTimeout = const Duration(seconds: 90);
     final proxyRule = _buildProxyRule();
     if (proxyRule != null) {

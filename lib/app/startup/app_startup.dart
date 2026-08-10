@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:i_iwara/app/repositories/history_repository.dart';
@@ -404,7 +405,7 @@ class AppStartupCoordinator implements AppStartupRunner {
     }
   }
 
-  void _configureProxy() {
+  Future<void> _configureProxy() async {
     final configService = Get.find<ConfigService>();
 
     if (ProxyUtil.isSupportedPlatform()) {
@@ -418,18 +419,33 @@ class AppStartupCoordinator implements AppStartupRunner {
       if (useProxy && proxyUrl != null && proxyUrl.isNotEmpty) {
         HttpOverrides.global = MyHttpOverrides(proxyUrl);
         HttpClientFactory.instance.setProxy(proxyUrl);
+        
+        // MITM 模式：加载 CA 证书（从原生导出的文件）
+        try {
+          final channel = const MethodChannel('i_iwara/ech_proxy');
+          final caPath = await channel.invokeMethod('exportCA') as String?;
+          if (caPath != null && !caPath.startsWith('CA not available') && !caPath.startsWith('export CA failed')) {
+            final caPem = File(caPath).readAsStringSync();
+            await HttpClientFactory.instance.setTrustedCA(caPem);
+          }
+        } catch (e) {
+          LogUtils.w('加载 MITM CA 失败，将使用 badCertificateCallback 兜底: $e', '启动初始化');
+        }
+        
         LogUtils.i('代理设置完成: $proxyUrl', '启动初始化');
         return;
       }
 
       HttpOverrides.global = MyHttpOverrides(null);
       HttpClientFactory.instance.setProxy(null);
+      await HttpClientFactory.instance.setTrustedCA(null);
       LogUtils.i('未启用代理', '启动初始化');
       return;
     }
 
     HttpOverrides.global = MyHttpOverrides(null);
     HttpClientFactory.instance.setProxy(null);
+    await HttpClientFactory.instance.setTrustedCA(null);
     LogUtils.i('当前平台不支持代理', '启动初始化');
   }
 
