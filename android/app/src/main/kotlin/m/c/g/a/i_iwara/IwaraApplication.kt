@@ -96,14 +96,19 @@ class IwaraApplication : Application() {
         }
     }
 
-    /** 导出 MITM CA 证书到文件（供用户安装信任） */
+    /** 导出 MITM CA 证书到公共目录（供用户安装信任） */
     fun exportCA(): String {
         return try {
             val pem = Echproxy.getCAPem()
             if (pem.isEmpty()) return "CA not available (MITM not enabled or proxy not running)"
-            val file = File(cacheDir, "ech_proxy_ca.crt")
+            // 写到公共 Download 目录，系统证书安装器可访问
+            val file = File(getExternalFilesDir(android.os.Environment.DIRECTORY_DOWNLOADS), "ech_proxy_ca.crt")
+            file.parentFile?.mkdirs()
             file.writeText(pem)
-            file.absolutePath
+            // 同时也复制一份到 /sdcard/ 根目录方便用户找到
+            val file2 = File(android.os.Environment.getExternalStorageDirectory(), "ech_proxy_ca.crt")
+            file2.writeText(pem)
+            "已导出到: ${file.absolutePath} 和 ${file2.absolutePath}\n请在系统设置→安全→安装证书→CA证书中选择任一文件"
         } catch (e: Throwable) {
             "export CA failed: $e"
         }
