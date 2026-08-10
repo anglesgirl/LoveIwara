@@ -790,19 +790,11 @@ class MyVideoStateController extends GetxController
           'MyVideoStateController',
         );
         if (useProxy && proxyUrl.isNotEmpty) {
-          // 如果是以 https 开头的地址，需要转换为 http
-          var finalProxyUrl = proxyUrl;
-          if (proxyUrl.startsWith('https://')) {
-            finalProxyUrl = proxyUrl.replaceFirst('https://', 'http://');
-          }
-          // 如果没有以 http 开头，需要加上 http://
-          if (!proxyUrl.startsWith('http://')) {
-            finalProxyUrl = 'http://$proxyUrl';
-          }
-          (player.platform as dynamic).setProperty('http-proxy', finalProxyUrl);
-          // 普通 CONNECT 隧道：播放器 TLS 直连真实服务器，系统默认校验证书（无需 tls-verify=no）
+          // 播放器 URL 已由 _toPlayerProxyUrl 改写为本地 path-prefix 格式
+          // （http://127.0.0.1:<port>/<域名>/<路径>），直连本地代理即可，
+          // 不设置 http-proxy（避免本地 URL 被 mpv 再转发回代理造成循环）
           LogUtils.i(
-            '播放器已配置去污染代理: $finalProxyUrl (CONNECT 透传)',
+            '播放器使用本地 path-prefix 代理 URL（直连 127.0.0.1 代理）',
             'MyVideoStateController',
           );
         }
@@ -1263,7 +1255,7 @@ class MyVideoStateController extends GetxController
       LogUtils.i('准备打开视频文件: $mediaPath', 'MyVideoStateController');
       final shouldAutoPlay = _resolvePlayStateForInitialEntry();
       videoPlaying.value = shouldAutoPlay;
-      await player.open(Media(mediaPath), play: shouldAutoPlay);
+      await player.open(Media(_toPlayerProxyUrl(mediaPath)), play: shouldAutoPlay);
       LogUtils.i('视频文件已打开', 'MyVideoStateController');
 
       // 设置监听器（必须在 player.open 之后调用）
@@ -2412,7 +2404,7 @@ class MyVideoStateController extends GetxController
         'MyVideoStateController',
       );
       await player.open(
-        Media(finalUrl, start: startPosition ?? currentPosition),
+        Media(_toPlayerProxyUrl(finalUrl), start: startPosition ?? currentPosition),
         play: playOnOpen,
       );
       await _applyRepeatMode();
@@ -2512,7 +2504,7 @@ class MyVideoStateController extends GetxController
         'MyVideoStateController',
       );
       await player.open(
-        Media(finalUrl, start: currentPosition),
+        Media(_toPlayerProxyUrl(finalUrl), start: currentPosition),
         play: playOnOpen,
       );
       pageLoadingState.value = VideoDetailPageLoadingState.addingListeners;
@@ -2882,7 +2874,7 @@ class MyVideoStateController extends GetxController
       final isPlaying = videoPlaying.value;
 
       // 打开新URL，保持播放状态
-      await player.open(Media(newUrl, start: savedPosition), play: isPlaying);
+      await player.open(Media(_toPlayerProxyUrl(newUrl), start: savedPosition), play: isPlaying);
       await _applyRepeatMode();
       // 源刷新后恢复当前播放倍速（open 会把倍速重置为 1.0）
       _applyPlaybackSpeedAfterOpen();
@@ -3970,6 +3962,35 @@ class MyVideoStateController extends GetxController
     );
   }
 
+  /// 播放器 URL 改写（去污染核心）：
+  /// 代理开启时把 https 视频 URL 转成本地 path-prefix 格式
+  /// `http://127.0.0.1:<port>/<目标域名>/<路径>`，由 ech-proxy-go 做上游
+  /// TLS + DoH 解析 + m3u8 分片重写，播放器只发纯 http 明文请求。
+  ///
+  /// 背景（2026-08-11 实测）：libmpv/ffmpeg 的 `https + http-proxy` 走
+  /// mbedtls 握手会 native 崩溃（ffurl_read 崩），curl 同隧道正常 → 播放器
+  /// 不能依赖 http-proxy 播放 https 流；path-prefix 模式绕开该缺陷。
+  String _toPlayerProxyUrl(String url) {
+    if (url.isEmpty || !url.startsWith('http')) return url; // file:// 等原样
+    final bool useProxy = _configService[ConfigKey.USE_PROXY] ?? false;
+    final String proxyUrl = _configService[ConfigKey.PROXY_URL] ?? '';
+    if (!useProxy || proxyUrl.isEmpty) return url;
+    try {
+      final u = Uri.parse(url);
+      if (!u.hasAuthority) return url;
+      var proxy = proxyUrl.replaceFirst(RegExp(r'^https?://'), '');
+      if (proxy.endsWith('/')) proxy = proxy.substring(0, proxy.length - 1);
+      final path = u.path.isEmpty ? '/' : u.path;
+      final q = u.hasQuery ? '?${u.query}' : '';
+      final rewritten = 'http://$proxy/${u.authority}$path$q';
+      LogUtils.d('播放器 URL 改写: $url -> $rewritten', 'MyVideoStateController');
+      return rewritten;
+    } catch (e) {
+      LogUtils.w('播放器 URL 改写失败，使用原 URL: $e', 'MyVideoStateController');
+      return url;
+    }
+  }
+
   /// 获取 preview 视频源的 URL
   Future<String?> getPreviewVideoUrl() async {
     if (previewVideoUrl != null) {
@@ -4094,7 +4115,7 @@ class MyVideoStateController extends GetxController
       previewPlayer!.setVolume(0);
 
       // 打开预览视频（但不自动播放）
-      await previewPlayer!.open(Media(previewUrl), play: false);
+      await previewPlayer!.open(Media(_toPlayerProxyUrl(previewUrl)), play: false);
 
       if (_isDisposed) {
         await _disposePreviewPlayer();
